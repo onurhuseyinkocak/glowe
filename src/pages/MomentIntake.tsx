@@ -2,8 +2,20 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, Sun, Moon, Cloud, MapPin, Clock, Zap, Video, Camera } from 'lucide-react';
+import { 
+  ChevronLeft, Sun, Moon, Cloud, MapPin, Clock, Zap, 
+  Video, Camera, Heart, Sparkles, ShieldCheck 
+} from 'lucide-react';
 import { showError } from '@/utils/toast';
+import { cn } from '@/lib/utils';
+
+const DATE_TYPES = ['First Date', 'Second Date', 'Long-term Partner', 'High-value Dinner'];
+const ENERGY_MODES = [
+  { id: 'Soft Romantic', icon: <Heart size={16} /> },
+  { id: 'Clean Girl', icon: <Sparkles size={16} /> },
+  { id: 'Elevated Minimalist', icon: <ShieldCheck size={16} /> },
+  { id: 'Magnetic Bold', icon: <Zap size={16} /> }
+];
 
 const MomentIntake = () => {
   const { type } = useParams();
@@ -12,11 +24,11 @@ const MomentIntake = () => {
   const [modifiers, setModifiers] = useState({
     location: 'Indoor',
     lighting: 'Bright',
-    duration: '1-3h',
-    priority: 'Impact',
-    framing: 'Head & Shoulders'
+    date_type: 'First Date',
+    energy_mode: 'Soft Romantic'
   });
 
+  const isDate = type?.includes('date');
   const isCreator = type?.includes('creator');
 
   const handleStartAnalysis = async () => {
@@ -42,17 +54,57 @@ const MomentIntake = () => {
   return (
     <div className="min-h-screen bg-[#FFFBFA] p-8 pb-32 max-w-md mx-auto">
       <header className="flex items-center gap-4 mb-12">
-        <button onClick={() => navigate('/')} className="p-2 hover:bg-[#F5F0E1] rounded-full transition-colors">
+        <button onClick={() => navigate('/')} className="p-2 hover:bg-[#FCE4EC] rounded-full transition-colors">
           <ChevronLeft size={24} />
         </button>
         <div>
-          <h1 className="text-2xl font-serif text-[#4A3F3F] capitalize">{type?.replace('_', ' ')}</h1>
-          <p className="text-[10px] uppercase tracking-widest text-[#8C7E7E]">Context Tuning</p>
+          <h1 className="text-2xl font-serif text-[#4A3F3F] capitalize">{type?.replace('-', ' ')}</h1>
+          <p className="text-[10px] uppercase tracking-widest text-[#BCAEAE]">Context Tuning</p>
         </div>
       </header>
 
       <div className="space-y-10 animate-fade-up">
-        {/* Location & Lighting */}
+        {isDate && (
+          <>
+            <section className="space-y-4">
+              <Label text="Date Type" />
+              <div className="grid grid-cols-2 gap-2">
+                {DATE_TYPES.map(dt => (
+                  <button
+                    key={dt}
+                    onClick={() => setModifiers({...modifiers, date_type: dt})}
+                    className={cn(
+                      "p-4 rounded-2xl text-[10px] font-bold uppercase tracking-widest border transition-all",
+                      modifiers.date_type === dt ? "bg-[#4A3F3F] text-white border-[#4A3F3F]" : "bg-white text-[#BCAEAE] border-[#FCE4EC]"
+                    )}
+                  >
+                    {dt}
+                  </button>
+                ))}
+              </div>
+            </section>
+
+            <section className="space-y-4">
+              <Label text="Energy Mode" />
+              <div className="grid grid-cols-2 gap-3">
+                {ENERGY_MODES.map(mode => (
+                  <button
+                    key={mode.id}
+                    onClick={() => setModifiers({...modifiers, energy_mode: mode.id})}
+                    className={cn(
+                      "flex flex-col items-center justify-center p-6 rounded-[32px] border-2 transition-all gap-3",
+                      modifiers.energy_mode === mode.id ? "bg-[#FCE4EC] border-[#D81B60] text-[#D81B60] scale-105 shadow-lg" : "bg-white border-[#FCE4EC] text-[#BCAEAE]"
+                    )}
+                  >
+                    {mode.icon}
+                    <span className="text-[8px] font-bold uppercase tracking-widest text-center">{mode.id}</span>
+                  </button>
+                ))}
+              </div>
+            </section>
+          </>
+        )}
+
         <section className="space-y-4">
           <Label text="Environment" />
           <div className="grid grid-cols-2 gap-3">
@@ -65,60 +117,6 @@ const MomentIntake = () => {
               active={modifiers.location === 'Outdoor'} 
               onClick={() => setModifiers({...modifiers, location: 'Outdoor'})}
               icon={<Cloud size={18} />} label="Outdoor" 
-            />
-          </div>
-        </section>
-
-        <section className="space-y-4">
-          <Label text="Lighting Condition" />
-          <div className="grid grid-cols-3 gap-3">
-            <SelectionCard 
-              active={modifiers.lighting === 'Bright'} 
-              onClick={() => setModifiers({...modifiers, lighting: 'Bright'})}
-              icon={<Sun size={18} />} label="Bright" 
-            />
-            <SelectionCard 
-              active={modifiers.lighting === 'Mixed'} 
-              onClick={() => setModifiers({...modifiers, lighting: 'Mixed'})}
-              icon={<Zap size={18} />} label="Mixed" 
-            />
-            <SelectionCard 
-              active={modifiers.lighting === 'Low'} 
-              onClick={() => setModifiers({...modifiers, lighting: 'Low'})}
-              icon={<Moon size={18} />} label="Low Light" 
-            />
-          </div>
-        </section>
-
-        {isCreator && (
-          <section className="space-y-4">
-            <Label text="Camera Framing" />
-            <div className="grid grid-cols-2 gap-3">
-              <SelectionCard 
-                active={modifiers.framing === 'Head & Shoulders'} 
-                onClick={() => setModifiers({...modifiers, framing: 'Head & Shoulders'})}
-                icon={<User size={18} />} label="Portrait" 
-              />
-              <SelectionCard 
-                active={modifiers.framing === 'Chest Up'} 
-                onClick={() => setModifiers({...modifiers, framing: 'Chest Up'})}
-                icon={<Video size={18} />} label="Medium" 
-              />
-            </div>
-          </section>
-        )}
-
-        <section className="space-y-4">
-          <Label text="Moment Priority" />
-          <div className="p-6 rounded-[32px] bg-white border border-[#F5F0E1] space-y-6">
-            <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-[#8C7E7E]">
-              <span>Comfort</span>
-              <span>Impact</span>
-            </div>
-            <input 
-              type="range" 
-              className="w-full accent-[#E8D5D8]" 
-              onChange={(e) => setModifiers({...modifiers, priority: parseInt(e.target.value) > 50 ? 'Impact' : 'Comfort'})}
             />
           </div>
         </section>
@@ -138,21 +136,20 @@ const MomentIntake = () => {
 };
 
 const Label = ({ text }: { text: string }) => (
-  <p className="text-[10px] font-bold text-[#8C7E7E] uppercase tracking-[0.2em] ml-2">{text}</p>
+  <p className="text-[10px] font-bold text-[#BCAEAE] uppercase tracking-[0.2em] ml-2">{text}</p>
 );
 
 const SelectionCard = ({ active, icon, label, onClick }: any) => (
   <button 
     onClick={onClick}
-    className={`flex flex-col items-center justify-center p-6 rounded-[32px] border-2 transition-all duration-300 gap-3 ${
-      active ? 'bg-[#E8D5D8] border-[#E8D5D8] text-[#4A3F3F] shadow-lg scale-105' : 'bg-white border-[#F5F0E1] text-[#8C7E7E]'
-    }`}
+    className={cn(
+      "flex flex-col items-center justify-center p-6 rounded-[32px] border-2 transition-all duration-300 gap-3",
+      active ? 'bg-[#FCE4EC] border-[#D81B60] text-[#D81B60] shadow-lg scale-105' : 'bg-white border-[#FCE4EC] text-[#BCAEAE]'
+    )}
   >
     {icon}
     <span className="text-[10px] font-bold uppercase tracking-widest">{label}</span>
   </button>
 );
-
-const User = ({ size }: { size: number }) => <Video size={size} />; // Placeholder for User icon
 
 export default MomentIntake;
