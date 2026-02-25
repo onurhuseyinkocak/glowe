@@ -10,13 +10,10 @@ export const supabase = createClient(
 
 /**
  * Auth yönlendirmeleri için mevcut tarayıcı adresini döner.
- * Bu sayede Vercel, Dyad Preview veya Localhost fark etmeksizin doğru yere döner.
+ * window.location.origin kullanımı Vercel/Local farkını ortadan kaldırır.
  */
 export const getURL = () => {
-  // window.location.origin o anki tam adresi (https://glowe.vercel.app gibi) verir
-  let url = window.location.origin;
-  
-  // URL'in sonunda / olduğundan emin ol
+  let url = typeof window !== 'undefined' ? window.location.origin : '';
   url = url.endsWith('/') ? url : `${url}/`;
   return url;
 };
