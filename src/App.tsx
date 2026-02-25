@@ -1,7 +1,7 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Layout from "./components/Layout";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -12,6 +12,8 @@ import History from "./pages/History";
 import Barbers from "./pages/Barbers";
 import BarberDetail from "./pages/BarberDetail";
 import Settings from "./pages/Settings";
+import VirtualTryOn from "./pages/VirtualTryOn";
+import Favorites from "./pages/Favorites";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +28,8 @@ const App = () => (
           <Route element={<Layout />}>
             <Route path="/" element={<Index />} />
             <Route path="/onboarding" element={<Onboarding />} />
+            <Route path="/try-on" element={<VirtualTryOn />} />
+            <Route path="/favorites" element={<Favorites />} />
             <Route path="/analysis/:id" element={<Analysis />} />
             <Route path="/results/:id" element={<Results />} />
             <Route path="/history" element={<History />} />

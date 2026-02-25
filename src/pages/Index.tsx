@@ -2,13 +2,12 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
-import { Camera, Upload, Sparkles, ChevronRight } from 'lucide-react';
-import { showError, showSuccess } from '@/utils/toast';
+import { Camera, Sparkles, Wand2, Heart, ChevronRight, Scissors } from 'lucide-react';
+import { showError } from '@/utils/toast';
 
 const Index = () => {
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -28,118 +27,75 @@ const Index = () => {
       .eq('user_id', user.id)
       .single();
 
-    if (!profile) {
-      navigate('/onboarding');
-    } else {
-      setProfile(profile);
-    }
+    if (!profile) navigate('/onboarding');
+    else setProfile(profile);
     setLoading(false);
-  };
-
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (file.size > 10 * 1024 * 1024) {
-      showError('File size must be less than 10MB');
-      return;
-    }
-
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
-
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}/${Math.random()}.${fileExt}`;
-      
-      const { error: uploadError } = await supabase.storage
-        .from('selfies')
-        .upload(fileName, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('selfies')
-        .getPublicUrl(fileName);
-
-      const { data: analysis, error: dbError } = await supabase
-        .from('analyses')
-        .insert({
-          user_id: user.id,
-          selfie_path: fileName,
-          selfie_public_url: publicUrl,
-          status: 'processing'
-        })
-        .select()
-        .single();
-
-      if (dbError) throw dbError;
-
-      navigate(`/analysis/${analysis.id}`);
-    } catch (error: any) {
-      showError(error.message);
-    }
   };
 
   if (loading) return null;
 
   return (
     <div className="p-6 space-y-8">
-      <header className="space-y-1">
-        <h1 className="text-3xl font-bold tracking-tight">Hey, {profile?.first_name || 'there'}!</h1>
-        <p className="text-gray-500">Ready for your next look?</p>
+      <header className="flex justify-between items-center">
+        <div className="space-y-1">
+          <h1 className="text-3xl font-bold tracking-tight">Selam, {profile?.first_name || 'Dostum'}!</h1>
+          <p className="text-gray-500">Bugün nasıl görünmek istersin?</p>
+        </div>
+        <button onClick={() => navigate('/favorites')} className="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center text-red-500 shadow-sm">
+          <Heart size={24} />
+        </button>
       </header>
 
-      <div className="relative overflow-hidden rounded-3xl bg-black p-8 text-white aspect-[4/5] flex flex-col justify-between">
-        <div className="absolute top-0 right-0 p-4 opacity-20">
-          <Sparkles size={120} />
-        </div>
+      {/* AI Virtual Try-On Hero */}
+      <div className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-black to-gray-800 p-8 text-white aspect-[4/5] flex flex-col justify-between shadow-2xl">
+        <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl" />
         
-        <div className="space-y-2 relative z-10">
-          <h2 className="text-4xl font-bold leading-tight">Find your<br />perfect cut.</h2>
-          <p className="text-gray-400 max-w-[200px]">AI-powered analysis based on your face shape and hair profile.</p>
+        <div className="space-y-3 relative z-10">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-[10px] font-bold uppercase tracking-widest">
+            <Sparkles size={12} className="text-yellow-400" />
+            Yeni Özellik
+          </div>
+          <h2 className="text-4xl font-black leading-tight tracking-tighter">AI İLE<br />TARZINI YARAT.</h2>
+          <p className="text-gray-400 text-sm max-w-[220px]">Saçını kestirmeden önce AI ile üzerinde nasıl duracağını anlık gör.</p>
         </div>
 
-        <div className="space-y-3 relative z-10">
+        <div className="space-y-4 relative z-10">
           <Button 
-            onClick={() => fileInputRef.current?.click()}
-            className="w-full h-14 rounded-2xl bg-white text-black hover:bg-gray-100 text-lg font-bold"
+            onClick={() => navigate('/try-on')}
+            className="w-full h-16 rounded-2xl bg-white text-black hover:bg-gray-100 text-lg font-black shadow-xl"
           >
-            <Camera className="mr-2" />
-            Take Selfie
+            <Wand2 className="mr-2" />
+            Sanal Denemeyi Başlat
           </Button>
-          <input 
-            type="file" 
-            ref={fileInputRef} 
-            onChange={handleFileUpload} 
-            accept="image/*" 
-            className="hidden" 
-          />
-          <p className="text-center text-xs text-gray-500">Or upload from gallery</p>
+          <div className="flex justify-center gap-6 text-[10px] font-bold text-white/40 uppercase tracking-widest">
+            <span>Anlık Değişim</span>
+            <span>•</span>
+            <span>AI Prompt</span>
+            <span>•</span>
+            <span>Favorile</span>
+          </div>
         </div>
       </div>
 
+      {/* Classic Analysis Section */}
       <section className="space-y-4">
         <div className="flex justify-between items-center">
-          <h3 className="font-bold text-lg">Quick Tips</h3>
-          <button className="text-sm text-gray-500 font-medium">View All</button>
+          <h3 className="font-bold text-lg">Hızlı Analiz</h3>
+          <button onClick={() => navigate('/history')} className="text-xs font-bold text-gray-400 uppercase tracking-widest">Geçmiş</button>
         </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="p-4 rounded-2xl bg-gray-50 space-y-2">
-            <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
-              <Sparkles size={16} />
-            </div>
-            <p className="text-sm font-bold">Good Lighting</p>
-            <p className="text-xs text-gray-500">Natural light works best for AI analysis.</p>
+        <button 
+          onClick={() => navigate('/onboarding')}
+          className="w-full p-6 rounded-3xl bg-gray-50 border border-gray-100 flex items-center gap-4 text-left hover:border-black transition-all"
+        >
+          <div className="w-12 h-12 rounded-2xl bg-black text-white flex items-center justify-center shrink-0">
+            <Scissors size={24} />
           </div>
-          <div className="p-4 rounded-2xl bg-gray-50 space-y-2">
-            <div className="w-8 h-8 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center">
-              <Camera size={16} />
-            </div>
-            <p className="text-sm font-bold">Front View</p>
-            <p className="text-xs text-gray-500">Look directly at the camera for accuracy.</p>
+          <div className="flex-1">
+            <p className="font-bold">Yüz Şekli Analizi</p>
+            <p className="text-xs text-gray-500">Sana en uygun kesimi AI belirlesin.</p>
           </div>
-        </div>
+          <ChevronRight className="text-gray-300" />
+        </button>
       </section>
     </div>
   );

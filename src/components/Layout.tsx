@@ -1,11 +1,11 @@
 import React from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
-import { Home, History, MapPin, Settings } from 'lucide-react';
+import { Home, History, MapPin, Settings, Heart, Wand2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const Layout = () => {
   const location = useLocation();
-  const hideNav = ['/auth', '/onboarding', '/analysis'].some(path => location.pathname.startsWith(path));
+  const hideNav = ['/auth', '/onboarding', '/analysis', '/try-on'].some(path => location.pathname.startsWith(path));
 
   if (hideNav) return <Outlet />;
 
@@ -18,7 +18,7 @@ const Layout = () => {
       <nav className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-lg border-t border-gray-100 px-6 py-3 z-50 max-w-md mx-auto">
         <div className="flex justify-between items-center">
           <TabLink to="/" icon={<Home size={24} />} label="Home" />
-          <TabLink to="/history" icon={<History size={24} />} label="History" />
+          <TabLink to="/favorites" icon={<Heart size={24} />} label="Favs" />
           <TabLink to="/barbers" icon={<MapPin size={24} />} label="Barbers" />
           <TabLink to="/settings" icon={<Settings size={24} />} label="Settings" />
         </div>
