@@ -2,15 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
-import { Sparkles, Video, Heart, Briefcase, Coffee, Moon, Zap, Star, Camera } from 'lucide-react';
+import { Sparkles, Heart, Briefcase, Coffee, Moon, Zap, Star, Camera, Flower2, Stars } from 'lucide-react';
 
 const MOMENTS = [
-  { id: 'first_date', label: 'First Date', icon: <Heart size={20} />, color: 'bg-rose-50 text-rose-500' },
-  { id: 'job_interview', label: 'Job Interview', icon: <Briefcase size={20} />, color: 'bg-blue-50 text-blue-500' },
-  { id: 'power_meeting', label: 'Power Meeting', icon: <Zap size={20} />, color: 'bg-amber-50 text-amber-500' },
-  { id: 'creator_camera', label: 'Creator Mode', icon: <Video size={20} />, color: 'bg-purple-50 text-purple-500' },
-  { id: 'daytime_casual', label: 'Daytime Casual', icon: <Coffee size={20} />, color: 'bg-orange-50 text-orange-500' },
-  { id: 'night_out', label: 'Night Out', icon: <Moon size={20} />, color: 'bg-indigo-50 text-indigo-500' },
+  { id: 'first_date', label: 'First Date', icon: <Heart size={24} />, color: 'bg-[#FCE4EC] text-[#D81B60]' },
+  { id: 'job_interview', label: 'Interview', icon: <Briefcase size={24} />, color: 'bg-[#E3F2FD] text-[#1E88E5]' },
+  { id: 'power_meeting', label: 'Meeting', icon: <Zap size={24} />, color: 'bg-[#FFF3E0] text-[#FB8C00]' },
+  { id: 'creator_camera', label: 'Creator', icon: <Stars size={24} />, color: 'bg-[#F3E5F5] text-[#8E24AA]' },
+  { id: 'daytime_casual', label: 'Casual', icon: <Coffee size={24} />, color: 'bg-[#E0F2F1] text-[#00897B]' },
+  { id: 'night_out', label: 'Night Out', icon: <Moon size={24} />, color: 'bg-[#E8EAF6] text-[#3949AB]' },
 ];
 
 const Index = () => {
@@ -34,60 +34,67 @@ const Index = () => {
   if (loading) return null;
 
   return (
-    <div className="p-8 space-y-10 bg-[#FFFBFA] min-h-screen pb-48">
-      <header className="space-y-2 animate-fade-up">
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-          <p className="text-[10px] uppercase tracking-[0.3em] text-[#8C7E7E] font-bold">Presence OS Active</p>
+    <div className="p-8 space-y-12 pb-48">
+      <header className="space-y-4 animate-fade-up">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-[#FCE4EC] animate-ping" />
+            <p className="text-[10px] uppercase tracking-[0.4em] text-[#BCAEAE] font-bold">Glowé OS v1.2</p>
+          </div>
+          <Flower2 className="text-[#FCE4EC] animate-spin-slow" size={24} />
         </div>
-        <h1 className="text-4xl font-serif text-[#4A3F3F] leading-tight">What’s your moment today?</h1>
+        <h1 className="text-5xl font-serif text-[#4A3F3F] leading-[1.1]">
+          Good morning, <br />
+          <span className="italic text-[#D81B60]">Radiant.</span>
+        </h1>
       </header>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-5">
         {MOMENTS.map((moment, i) => (
           <button
             key={moment.id}
             onClick={() => navigate(`/moment-intake/${moment.id}`)}
             style={{ animationDelay: `${i * 100}ms` }}
-            className="p-6 rounded-[32px] bg-white border border-[#F5F0E1] text-left space-y-4 hover:border-[#E8D5D8] hover:shadow-xl hover:shadow-rose-100/20 transition-all group animate-fade-up"
+            className="p-7 rounded-[40px] bg-white/60 backdrop-blur-md border border-white shadow-[0_10px_30px_rgba(252,228,236,0.3)] text-left space-y-5 hover:scale-[1.02] transition-all group animate-fade-up"
           >
-            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${moment.color} group-hover:scale-110 transition-transform duration-500`}>
+            <div className={`w-14 h-14 rounded-[22px] flex items-center justify-center ${moment.color} shadow-inner group-hover:rotate-6 transition-transform duration-500`}>
               {moment.icon}
             </div>
-            <p className="font-bold text-sm text-[#4A3F3F]">{moment.label}</p>
+            <p className="font-bold text-sm tracking-tight text-[#4A3F3F]">{moment.label}</p>
           </button>
         ))}
       </div>
 
       <section className="space-y-6 animate-fade-up" style={{ animationDelay: '600ms' }}>
         <div className="flex justify-between items-center px-2">
-          <h3 className="font-serif text-2xl text-[#4A3F3F]">Daily Insight</h3>
-          <Star className="text-[#E8D5D8]" size={20} fill="currentColor" />
+          <h3 className="font-serif text-2xl text-[#4A3F3F]">Daily Ritual</h3>
+          <Sparkles className="text-[#FCE4EC]" size={20} fill="currentColor" />
         </div>
-        <div className="p-8 rounded-[40px] bg-white border border-[#F5F0E1] shadow-sm space-y-4 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-[#F5F0E1] rounded-full -mr-16 -mt-16 opacity-50" />
-          <div className="flex items-center gap-4 relative z-10">
-            <div className="w-10 h-10 rounded-full bg-[#E8D5D8] flex items-center justify-center text-[#4A3F3F]">
-              <Sparkles size={18} />
+        <div className="p-10 rounded-[50px] bg-gradient-to-br from-white to-[#FCE4EC]/20 border border-white shadow-xl space-y-6 relative overflow-hidden">
+          <div className="absolute -top-10 -right-10 w-40 h-40 bg-[#F3E5F5] rounded-full blur-3xl opacity-40" />
+          <div className="flex items-center gap-5 relative z-10">
+            <div className="w-12 h-12 rounded-full bg-white shadow-md flex items-center justify-center text-[#D81B60]">
+              <Star size={22} fill="currentColor" />
             </div>
             <div>
-              <p className="font-bold text-[#4A3F3F]">Focus: Posture & Radiance</p>
-              <p className="text-[10px] text-[#8C7E7E] uppercase tracking-widest">Presence Habit</p>
+              <p className="font-bold text-[#4A3F3F] text-lg">Soft Alignment</p>
+              <p className="text-[10px] text-[#BCAEAE] uppercase tracking-[0.2em] font-bold">Morning Habit</p>
             </div>
           </div>
-          <p className="text-xs text-[#4A3F3F]/70 leading-relaxed italic relative z-10">
-            "Today's micro-habit: 2 minutes of wall-standing to reset your alignment before your first meeting."
+          <p className="text-sm text-[#4A3F3F]/80 leading-relaxed italic relative z-10">
+            "Take 3 deep breaths. Visualize your glow expanding from your core to your fingertips before you step out."
           </p>
         </div>
       </section>
 
-      {/* Fixed Action Button - Spacing adjusted for Nav Bar */}
-      <div className="fixed bottom-28 left-1/2 -translate-x-1/2 w-[85%] max-w-sm z-40">
+      <div className="fixed bottom-28 left-1/2 -translate-x-1/2 w-[88%] max-w-sm z-40">
         <Button 
           onClick={() => navigate('/try-on')}
-          className="w-full h-16 rounded-full bg-[#4A3F3F] text-white text-lg font-bold shadow-2xl shadow-black/20 hover:bg-[#2D2424] transition-all active:scale-95 flex items-center justify-center gap-3"
+          className="w-full h-20 rounded-full bg-[#4A3F3F] text-white text-lg font-bold shadow-[0_20px_50px_rgba(0,0,0,0.2)] hover:bg-black transition-all active:scale-95 flex items-center justify-center gap-4 border-t border-white/10"
         >
-          <Camera size={22} />
+          <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
+            <Camera size={20} />
+          </div>
           AI Virtual Try-On
         </Button>
       </div>
