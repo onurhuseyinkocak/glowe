@@ -2,14 +2,20 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
-import { Share2, ChevronLeft, Sparkles, Palette, CheckCircle2, Video, Mic2, User } from 'lucide-react';
-import StyleCard from '@/components/StyleCard';
+import { 
+  Share2, ChevronLeft, Sparkles, Palette, CheckCircle2, 
+  Video, Mic2, User, Scissors, Heart, ShieldCheck, Zap
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { showSuccess } from '@/utils/toast';
 
 const Results = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [moment, setMoment] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('outfit');
+  const [expandedCheck, setExpandedCheck] = useState<number | null>(null);
 
   useEffect(() => {
     fetchMoment();
@@ -24,89 +30,261 @@ const Results = () => {
   if (loading || !moment) return null;
 
   const plan = moment.plan_json;
+  const isDate = moment.moment_type.includes('date');
+
+  const tabs = [
+    { id: 'outfit', label: 'Outfit', icon: <Palette size={16} /> },
+    { id: 'beauty', label: 'Beauty', icon: <Sparkles size={16} /> },
+    { id: 'hair', label: 'Hair', icon: <Scissors size={16} /> },
+    { id: 'presence', label: 'Presence', icon: <User size={16} /> },
+  ];
 
   return (
-    <div className="min-h-screen bg-[#FFFBFA] pb-32">
-      <div className="p-6 flex items-center justify-between bg-white/50 backdrop-blur-md sticky top-0 z-50">
-        <button onClick={() => navigate('/')} className="p-2 hover:bg-[#F5F0E1] rounded-full">
-          <ChevronLeft size={24} />
-        </button>
-        <h1 className="font-serif text-xl text-[#4A3F3F]">Moment Plan</h1>
-        <div className="w-10" />
+    <div className={cn(
+      "min-h-screen pb-32 transition-colors duration-1000",
+      isDate ? "bg-[#FFF9F9]" : "bg-[#FFFBFA]"
+    )}>
+      {/* Hero Header */}
+      <div className="relative h-80 overflow-hidden">
+        <div className={cn(
+          "absolute inset-0 opacity-30",
+          isDate ? "bg-gradient-to-br from-rose-200 via-pink-100 to-transparent" : "bg-gradient-to-br from-blue-100 via-white to-transparent"
+        )} />
+        {isDate && (
+          <div className="absolute inset-0 flex items-center justify-center opacity-20">
+            <div className="w-64 h-64 rounded-full bg-rose-300 blur-[100px] animate-pulse" />
+          </div>
+        )}
+        
+        <div className="relative z-10 p-8 pt-12 space-y-6">
+          <div className="flex items-center justify-between">
+            <button onClick={() => navigate('/')} className="p-2 bg-white/50 backdrop-blur-md rounded-full">
+              <ChevronLeft size={24} />
+            </button>
+            <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/80 backdrop-blur-md border border-white shadow-sm">
+              <Sparkles size={14} className="text-[#D81B60]" />
+              <span className="text-[10px] font-bold uppercase tracking-widest">Glow Score: {plan.glow_score}</span>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <h1 className="text-5xl font-serif text-[#4A3F3F] capitalize">{moment.moment_type.replace('-', ' ')}</h1>
+            <p className="text-sm text-[#8C7E7E] font-medium italic">{plan.look_direction}</p>
+          </div>
+        </div>
       </div>
 
-      <div className="p-8 space-y-8">
-        <StyleCard 
-          score={plan.glow_score} 
-          moment={moment.moment_type.replace('_', ' ')} 
-          direction={plan.look_direction} 
-        />
-
-        <div className="space-y-6">
-          <PlanModule icon={<Palette size={18} />} title="Color Palette">
-            <div className="flex gap-2 mt-3">
-              {plan.color_palette.colors.map((c: string) => (
-                <div key={c} className="w-10 h-10 rounded-xl shadow-inner" style={{ backgroundColor: c }} />
-              ))}
+      {/* Context Bar */}
+      <div className="px-8 -mt-8 relative z-20">
+        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-4">
+          {Object.entries(moment.context_modifiers).map(([key, val]: any) => (
+            <div key={key} className="px-4 py-2 rounded-full bg-white border border-[#FCE4EC] shadow-sm whitespace-nowrap">
+              <span className="text-[9px] font-bold uppercase tracking-widest text-[#BCAEAE] mr-2">{key}:</span>
+              <span className="text-[10px] font-bold text-[#4A3F3F]">{val}</span>
             </div>
-            <p className="text-[10px] text-[#8C7E7E] mt-3 uppercase tracking-widest">Avoid: {plan.color_palette.avoid.join(', ')}</p>
-          </PlanModule>
-          
-          <PlanModule icon={<User size={18} />} title={plan.styling.title} content={plan.styling.content}>
-            <ul className="mt-3 space-y-2">
-              {plan.styling.tips.map((t: string) => (
-                <li key={t} className="text-xs text-[#8C7E7E] flex items-center gap-2">
-                  <div className="w-1 h-1 rounded-full bg-[#E8D5D8]" /> {t}
-                </li>
-              ))}
-            </ul>
-          </PlanModule>
+          ))}
+        </div>
+      </div>
 
-          {plan.camera_presence && (
-            <PlanModule icon={<Video size={18} />} title="Camera Presence">
-              <div className="space-y-3 mt-2">
-                <p className="text-sm text-[#4A3F3F]"><span className="font-bold">Framing:</span> {plan.camera_presence.framing}</p>
-                <p className="text-sm text-[#4A3F3F]"><span className="font-bold">Eye Line:</span> {plan.camera_presence.eye_line}</p>
-                <p className="text-xs italic text-[#8C7E7E]">{plan.camera_presence.micro_expressions}</p>
-              </div>
-            </PlanModule>
-          )}
+      {/* Tabs */}
+      <div className="px-8 mt-8 space-y-8">
+        <div className="flex justify-between border-b border-[#FCE4EC]">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={cn(
+                "pb-4 px-2 flex flex-col items-center gap-2 transition-all relative",
+                activeTab === tab.id ? "text-[#D81B60]" : "text-[#BCAEAE]"
+              )}
+            >
+              {tab.icon}
+              <span className="text-[9px] font-bold uppercase tracking-widest">{tab.label}</span>
+              {activeTab === tab.id && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#D81B60] rounded-full" />
+              )}
+            </button>
+          ))}
+        </div>
 
-          <PlanModule icon={<CheckCircle2 size={18} />} title="Quick Checklist">
-            <div className="grid gap-2 mt-3">
-              {plan.checklist.map((item: string) => (
-                <div key={item} className="flex items-center gap-3 p-4 rounded-2xl border border-[#F5F0E1] bg-white">
-                  <div className="w-5 h-5 rounded-full border-2 border-[#E8D5D8]" />
-                  <span className="text-sm text-[#4A3F3F]">{item}</span>
+        {/* Tab Content */}
+        <div className="animate-fade-up">
+          {activeTab === 'outfit' && (
+            <div className="space-y-6">
+              {plan.styling.options.map((opt: any, i: number) => (
+                <div key={i} className="p-8 rounded-[40px] bg-white border border-[#FCE4EC] space-y-6 shadow-sm">
+                  <div className="flex justify-between items-center">
+                    <h3 className="font-serif text-2xl text-[#4A3F3F]">{opt.title}</h3>
+                    {i === 0 && <div className="px-3 py-1 rounded-full bg-[#FCE4EC] text-[8px] font-bold text-[#D81B60] uppercase tracking-widest">Best Match</div>}
+                  </div>
+                  <p className="text-sm text-[#8C7E7E] leading-relaxed">{opt.silhouette}</p>
+                  <div className="space-y-3">
+                    <p className="text-[9px] font-bold text-[#BCAEAE] uppercase tracking-widest">Palette</p>
+                    <div className="flex gap-2">
+                      {opt.palette.map((c: string) => (
+                        <div key={c} className="w-10 h-10 rounded-xl shadow-inner border border-black/5" style={{ backgroundColor: c }} />
+                      ))}
+                    </div>
+                  </div>
+                  <div className="pt-4 border-t border-[#FCE4EC]">
+                    <p className="text-[9px] font-bold text-red-300 uppercase tracking-widest">Avoid: {opt.avoid.join(', ')}</p>
+                  </div>
                 </div>
               ))}
             </div>
-          </PlanModule>
+          )}
+
+          {activeTab === 'beauty' && (
+            <div className="p-8 rounded-[40px] bg-white border border-[#FCE4EC] space-y-8 shadow-sm">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-[#FCE4EC] flex items-center justify-center text-[#D81B60]">
+                  <Sparkles size={24} />
+                </div>
+                <div>
+                  <h3 className="font-bold text-[#4A3F3F]">{plan.makeup_grooming.focus}</h3>
+                  <p className="text-xs text-[#BCAEAE]">{plan.makeup_grooming.finish} Finish</p>
+                </div>
+              </div>
+              <div className="space-y-4">
+                {plan.makeup_grooming.steps.map((step: string, i: number) => (
+                  <div key={i} className="flex gap-4">
+                    <span className="text-2xl font-serif text-[#FCE4EC]">{i + 1}</span>
+                    <p className="text-sm text-[#4A3F3F] leading-relaxed pt-1">{step}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'hair' && (
+            <div className="p-8 rounded-[40px] bg-white border border-[#FCE4EC] space-y-8 shadow-sm">
+              <div className="space-y-2">
+                <h3 className="font-serif text-2xl text-[#4A3F3F]">{plan.hair_covering.title}</h3>
+                <p className="text-sm text-[#8C7E7E]">{plan.hair_covering.direction}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <p className="text-[9px] font-bold text-emerald-400 uppercase tracking-widest">Do's</p>
+                  <ul className="space-y-2">
+                    {plan.hair_covering.dos.map((item: string) => (
+                      <li key={item} className="text-xs text-[#4A3F3F] flex items-center gap-2">
+                        <div className="w-1 h-1 rounded-full bg-emerald-400" /> {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="space-y-3">
+                  <p className="text-[9px] font-bold text-red-400 uppercase tracking-widest">Don'ts</p>
+                  <ul className="space-y-2">
+                    {plan.hair_covering.donts.map((item: string) => (
+                      <li key={item} className="text-xs text-[#4A3F3F] flex items-center gap-2">
+                        <div className="w-1 h-1 rounded-full bg-red-400" /> {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'presence' && (
+            <div className="space-y-6">
+              <div className="p-8 rounded-[40px] bg-[#4A3F3F] text-white space-y-4 shadow-xl">
+                <div className="flex items-center gap-3 text-[#FCE4EC]">
+                  <Zap size={20} />
+                  <h3 className="font-bold text-sm uppercase tracking-widest">The Entrance</h3>
+                </div>
+                <p className="text-lg font-serif italic leading-relaxed">"{plan.presence.entrance}"</p>
+              </div>
+              <div className="p-8 rounded-[40px] bg-white border border-[#FCE4EC] space-y-6 shadow-sm">
+                <div className="space-y-3">
+                  <p className="text-[9px] font-bold text-[#BCAEAE] uppercase tracking-widest">Posture Cues</p>
+                  <div className="grid gap-2">
+                    {plan.presence.posture.map((p: string) => (
+                      <div key={p} className="flex items-center gap-3 p-4 rounded-2xl bg-[#FFF9F9] border border-[#FCE4EC]">
+                        <ShieldCheck size={16} className="text-[#D81B60]" />
+                        <span className="text-xs font-bold text-[#4A3F3F]">{p}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="pt-4 border-t border-[#FCE4EC]">
+                  <p className="text-[9px] font-bold text-[#BCAEAE] uppercase tracking-widest mb-2">Calm Technique</p>
+                  <p className="text-sm text-[#4A3F3F]">{plan.presence.calm_technique}</p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
-        <div className="grid grid-cols-2 gap-4 pt-6">
-          <Button className="h-16 rounded-full bg-[#4A3F3F] text-white font-bold shadow-lg">
-            <Share2 className="mr-2" size={18} />
-            Share Card
-          </Button>
-          <Button variant="outline" onClick={() => navigate('/')} className="h-16 rounded-full border-2 border-[#F5F0E1] font-bold text-[#4A3F3F]">
-            Done
-          </Button>
+        {/* Action Checklist */}
+        <section className="space-y-6">
+          <div className="flex items-center justify-between px-2">
+            <h3 className="font-serif text-2xl text-[#4A3F3F]">Final Prep</h3>
+            <CheckCircle2 size={20} className="text-[#D81B60]" />
+          </div>
+          <div className="space-y-3">
+            {plan.checklist.map((item: any, i: number) => (
+              <div 
+                key={i} 
+                className="rounded-[32px] bg-white border border-[#FCE4EC] overflow-hidden transition-all duration-500"
+              >
+                <button 
+                  onClick={() => setExpandedCheck(expandedCheck === i ? null : i)}
+                  className="w-full p-6 flex items-center justify-between text-left"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-6 h-6 rounded-full border-2 border-[#FCE4EC] flex items-center justify-center">
+                      <div className="w-2 h-2 rounded-full bg-[#D81B60] opacity-0 transition-opacity" />
+                    </div>
+                    <span className="text-sm font-bold text-[#4A3F3F]">{item.task}</span>
+                  </div>
+                  <ChevronLeft className={cn("text-[#BCAEAE] transition-transform", expandedCheck === i ? "rotate-90" : "-rotate-90")} size={18} />
+                </button>
+                {expandedCheck === i && (
+                  <div className="px-16 pb-6 animate-fade-down">
+                    <p className="text-xs text-[#8C7E7E] leading-relaxed">{item.how}</p>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Final Ready Card */}
+        <div className="pt-12 space-y-8">
+          <div className="p-10 rounded-[50px] bg-gradient-to-br from-[#FCE4EC] to-[#F3E5F5] text-center space-y-6 shadow-inner">
+            <h3 className="text-3xl font-serif text-[#4A3F3F]">You're Ready.</h3>
+            <div className="space-y-2">
+              <p className="text-xs font-bold text-[#D81B60] uppercase tracking-widest">Remember</p>
+              <p className="text-sm text-[#4A3F3F] italic">Shoulders down. Chin neutral. Deep breath.</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <Button 
+              onClick={() => {
+                showSuccess('Glow Card Saved');
+                navigate('/history');
+              }}
+              className="h-20 rounded-full bg-[#4A3F3F] text-white font-bold shadow-xl hover:bg-black transition-all"
+            >
+              <Heart className="mr-2" size={18} />
+              Save Look
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={() => showSuccess('Ready to share')}
+              className="h-20 rounded-full border-2 border-[#FCE4EC] font-bold text-[#4A3F3F] bg-white"
+            >
+              <Share2 className="mr-2" size={18} />
+              Share Card
+            </Button>
+          </div>
         </div>
       </div>
     </div>
   );
 };
-
-const PlanModule = ({ icon, title, content, children }: any) => (
-  <div className="p-8 rounded-[40px] bg-white border border-[#F5F0E1] space-y-3">
-    <div className="flex items-center gap-3 text-[#E8D5D8]">
-      {icon}
-      <h3 className="font-bold text-sm uppercase tracking-widest text-[#4A3F3F]">{title}</h3>
-    </div>
-    {content && <p className="text-sm text-[#8C7E7E] leading-relaxed">{content}</p>}
-    {children}
-  </div>
-);
 
 export default Results;
