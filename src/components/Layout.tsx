@@ -1,26 +1,25 @@
 import React from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
-import { Home, History, MapPin, Settings, Heart, Wand2 } from 'lucide-react';
+import { Home, History, Sparkles, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const Layout = () => {
   const location = useLocation();
-  const hideNav = ['/auth', '/onboarding', '/analysis', '/try-on'].some(path => location.pathname.startsWith(path));
+  const hideNav = ['/auth', '/onboarding', '/analysis'].some(path => location.pathname.startsWith(path));
 
   if (hideNav) return <Outlet />;
 
   return (
-    <div className="flex flex-col min-h-screen bg-white text-black max-w-md mx-auto border-x border-gray-100 shadow-xl">
-      <main className="flex-1 overflow-y-auto pb-24">
+    <div className="flex flex-col min-h-screen bg-[#FFFBFA] text-[#2D2424] max-w-md mx-auto border-x border-[#F5F0E1] shadow-2xl">
+      <main className="flex-1 overflow-y-auto pb-28">
         <Outlet />
       </main>
 
-      <nav className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-lg border-t border-gray-100 px-6 py-3 z-50 max-w-md mx-auto">
+      <nav className="fixed bottom-8 left-1/2 -translate-x-1/2 w-[90%] max-w-[360px] bg-white/70 backdrop-blur-xl border border-white/40 rounded-[40px] px-8 py-4 z-50 shadow-xl shadow-rose-100/20">
         <div className="flex justify-between items-center">
-          <TabLink to="/" icon={<Home size={24} />} label="Home" />
-          <TabLink to="/favorites" icon={<Heart size={24} />} label="Favs" />
-          <TabLink to="/barbers" icon={<MapPin size={24} />} label="Barbers" />
-          <TabLink to="/settings" icon={<Settings size={24} />} label="Settings" />
+          <TabLink to="/" icon={<Home size={22} />} label="Home" />
+          <TabLink to="/history" icon={<History size={22} />} label="Moments" />
+          <TabLink to="/settings" icon={<Settings size={22} />} label="Profile" />
         </div>
       </nav>
     </div>
@@ -32,13 +31,13 @@ const TabLink = ({ to, icon, label }: { to: string; icon: React.ReactNode; label
     to={to}
     className={({ isActive }) =>
       cn(
-        "flex flex-col items-center gap-1 transition-colors",
-        isActive ? "text-black" : "text-gray-400"
+        "flex flex-col items-center gap-1.5 transition-all duration-300",
+        isActive ? "text-[#4A3F3F] scale-110" : "text-[#8C7E7E] hover:text-[#4A3F3F]"
       )
     }
   >
     {icon}
-    <span className="text-[10px] font-medium uppercase tracking-wider">{label}</span>
+    <span className="text-[9px] font-bold uppercase tracking-[0.2em]">{label}</span>
   </NavLink>
 );
 

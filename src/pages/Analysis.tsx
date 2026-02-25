@@ -11,106 +11,67 @@ const Analysis = () => {
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(timer);
-          return 100;
-        }
-        return prev + 1;
-      });
-    }, 50);
-
+      setProgress(prev => (prev >= 100 ? 100 : prev + 1));
+    }, 60);
     processAnalysis();
-
     return () => clearInterval(timer);
   }, []);
 
   const processAnalysis = async () => {
     try {
-      // Simulate AI processing delay
-      await new Promise(resolve => setTimeout(resolve, 5000));
-
-      const { data: analysis } = await supabase
-        .from('analyses')
-        .select('*, users_profile(*)')
-        .eq('id', id)
-        .single();
-
-      if (!analysis) throw new Error('Analysis not found');
-
-      // Mock AI Logic based on profile
-      const profile = analysis.users_profile;
-      const faceShapes = ['oval', 'square', 'round', 'oblong', 'diamond'];
+      await new Promise(resolve => setTimeout(resolve, 6000));
+      const { data: analysis } = await supabase.from('analyses').select('*, users_profile(*)').eq('id', id).single();
+      
+      const faceShapes = ['Oval', 'Square', 'Round', 'Heart', 'Diamond'];
       const faceShape = faceShapes[Math.floor(Math.random() * faceShapes.length)];
-      
-      let bestCut = 'Classic Taper';
-      let instructions = 'Keep it clean on the sides with a #2 guard. Blend into a textured top about 2 inches long.';
-      
-      if (profile.style_vibe === 'trendy') {
-        bestCut = 'Textured Crop Fade';
-        instructions = 'High skin fade on the sides. Heavy texture on top with a blunt fringe.';
-      } else if (profile.style_vibe === 'bold') {
-        bestCut = 'Modern Mullet';
-        instructions = 'Burst fade on the temples. Keep length in the back and messy texture on top.';
-      }
+      const score = 88 + Math.floor(Math.random() * 10);
 
-      const { error } = await supabase
-        .from('analyses')
-        .update({
-          status: 'done',
-          face_shape: faceShape,
-          best_cut: bestCut,
-          barber_instructions: instructions,
-          why_it_works: `The ${bestCut} complements your ${faceShape} face shape by adding height and structure.`,
-          share_title: `My new look: ${bestCut}`,
-          share_hashtags: ['CutMatch', 'FreshCut', 'BarberStyle']
-        })
-        .eq('id', id);
+      await supabase.from('analyses').update({
+        status: 'done',
+        glow_face_shape: faceShape,
+        glow_score: score,
+        best_cut: analysis.event_type === 'Job Interview' ? 'Polished low bun or structured bob.' : 'Soft romantic waves with natural volume.',
+        makeup_direction: analysis.event_type === 'First Date' ? 'Dewy skin, soft flush, and a hint of shimmer.' : 'Matte finish, neutral tones, and confident brows.',
+        why_it_works: `Your ${faceShape} features are naturally balanced. We're enhancing that symmetry for your ${analysis.event_type}.`
+      }).eq('id', id);
 
-      if (error) throw error;
       navigate(`/results/${id}`);
-    } catch (error: any) {
-      showError(error.message);
-      navigate('/');
-    }
+    } catch (error: any) { showError(error.message); navigate('/'); }
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-8 bg-black text-white text-center space-y-8">
+    <div className="min-h-screen flex flex-col items-center justify-center p-12 bg-[#FFFBFA] text-center space-y-12">
       <div className="relative">
-        <div className="w-32 h-32 rounded-full border-4 border-white/10 flex items-center justify-center">
-          <Loader2 className="animate-spin text-white" size={48} />
+        <div className="w-40 h-40 rounded-full border-2 border-[#F5F0E1] flex items-center justify-center">
+          <Loader2 className="animate-spin text-[#E8D5D8]" size={48} />
         </div>
         <div className="absolute inset-0 flex items-center justify-center">
-          <Sparkles className="text-white/50 animate-pulse" size={24} />
+          <Sparkles className="text-[#E8D5D8]/40 animate-pulse" size={32} />
         </div>
       </div>
 
-      <div className="space-y-2">
-        <h2 className="text-2xl font-bold tracking-tight">Analyzing your features</h2>
-        <p className="text-gray-400">Our AI is crafting your perfect style card...</p>
+      <div className="space-y-4">
+        <h2 className="text-3xl font-serif text-[#4A3F3F]">Refining your glow...</h2>
+        <p className="text-[#8C7E7E] max-w-[240px] mx-auto italic">"Patience is the first step to radiance."</p>
       </div>
 
-      <div className="w-full max-w-xs bg-white/10 h-1.5 rounded-full overflow-hidden">
-        <div 
-          className="h-full bg-white transition-all duration-300 ease-out"
-          style={{ width: `${progress}%` }}
-        />
+      <div className="w-full max-w-xs bg-[#F5F0E1] h-1 rounded-full overflow-hidden">
+        <div className="h-full bg-[#E8D5D8] transition-all duration-500 ease-out" style={{ width: `${progress}%` }} />
       </div>
 
-      <div className="grid grid-cols-1 gap-4 text-left w-full max-w-xs">
-        <StatusItem active={progress > 20} label="Scanning face shape" />
-        <StatusItem active={progress > 50} label="Detecting hair texture" />
-        <StatusItem active={progress > 80} label="Matching style preferences" />
+      <div className="space-y-4 text-left w-full max-w-xs">
+        <StatusItem active={progress > 20} label="Mapping facial harmony" />
+        <StatusItem active={progress > 50} label="Curating color palette" />
+        <StatusItem active={progress > 80} label="Finalizing your Glowé Plan" />
       </div>
     </div>
   );
 };
 
 const StatusItem = ({ active, label }: { active: boolean; label: string }) => (
-  <div className={`flex items-center gap-3 transition-opacity duration-500 ${active ? 'opacity-100' : 'opacity-20'}`}>
-    <div className={`w-2 h-2 rounded-full ${active ? 'bg-green-400' : 'bg-white'}`} />
-    <span className="text-sm font-medium">{label}</span>
+  <div className={`flex items-center gap-4 transition-all duration-700 ${active ? 'opacity-100 translate-x-0' : 'opacity-20 -translate-x-2'}`}>
+    <div className={`w-1.5 h-1.5 rounded-full ${active ? 'bg-[#E8D5D8]' : 'bg-[#8C7E7E]'}`} />
+    <span className="text-[11px] font-bold uppercase tracking-widest text-[#4A3F3F]">{label}</span>
   </div>
 );
 
