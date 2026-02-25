@@ -2,17 +2,16 @@
 
 ## 1. Environment Variables
 ```env
-VITE_SUPABASE_URL=your_url
-VITE_SUPABASE_ANON_KEY=your_key
-VITE_SITE_URL=https://glowe.app
+VITE_SUPABASE_URL=your_supabase_project_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+VITE_SITE_URL=https://glowe.vercel.app
 ```
 
-## 2. RevenueCat Setup (Subscription)
-1. Create a project in RevenueCat.
-2. Add iOS/Android apps.
-3. Create Entitlement: `pro`.
-4. Create Offerings: `Monthly ($7.99)`, `Yearly ($59.99)`.
-5. Copy API Keys to your app config.
+## 2. Supabase Auth Configuration
+1. Go to **Authentication > URL Configuration**.
+2. Set **Site URL** to `https://glowe.vercel.app`.
+3. Add `https://glowe.vercel.app/**` to **Redirect URLs**.
+4. For Google/Apple Auth: Enable them in **Authentication > Providers** and enter your Client IDs.
 
 ## 3. Supabase Storage
 1. Create bucket: `selfies` (Private).
@@ -21,7 +20,6 @@ VITE_SITE_URL=https://glowe.app
 ## 4. Smoke Test
 - [ ] Baseline setup completes and saves to `user_baseline`.
 - [ ] Home screen shows moment types.
-- [ ] Moment intake generates a plan with Voice/Camera modules for Creator types.
+- [ ] Moment intake generates a plan.
 - [ ] Results screen displays all modules correctly.
-- [ ] Paywall appears after 3rd plan (Free tier limit).
-- [ ] Diagnostics screen (5 taps on version) shows system status.
+- [ ] Diagnostics screen (5 taps on version in Settings) shows system status.
