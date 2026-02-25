@@ -25,10 +25,19 @@ const Index = () => {
   const checkUser = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { navigate('/auth'); return; }
-    const { data: baseline } = await supabase.from('user_baseline').select('*').eq('user_id', user.id).single();
-    if (!baseline) navigate('/onboarding');
-    else setProfile(baseline);
-    setLoading(false);
+    
+    const { data: profileData } = await supabase
+      .from('user_profile')
+      .select('*')
+      .eq('user_id', user.id)
+      .single();
+
+    if (!profileData) {
+      navigate('/onboarding');
+    } else {
+      setProfile(profileData);
+      setLoading(false);
+    }
   };
 
   if (loading) return null;
