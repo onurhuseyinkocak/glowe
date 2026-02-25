@@ -15,6 +15,9 @@ import Barbers from "./pages/Barbers";
 import BarberDetail from "./pages/BarberDetail";
 import Favorites from "./pages/Favorites";
 import VirtualTryOn from "./pages/VirtualTryOn";
+import Wardrobe from "./pages/Wardrobe";
+import Today from "./pages/Today";
+import Outfits from "./pages/Outfits";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +41,9 @@ const App = () => (
             <Route path="/barbers/:id" element={<BarberDetail />} />
             <Route path="/favorites" element={<Favorites />} />
             <Route path="/try-on" element={<VirtualTryOn />} />
+            <Route path="/wardrobe" element={<Wardrobe />} />
+            <Route path="/today" element={<Today />} />
+            <Route path="/outfits" element={<Outfits />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
