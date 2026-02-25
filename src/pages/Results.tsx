@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Share2, ChevronLeft, Sparkles, Palette, CheckCircle2, Video, Mic2, User } from 'lucide-react';
-import { showSuccess } from '@/utils/toast';
+import StyleCard from '@/components/StyleCard';
 
 const Results = () => {
   const { id } = useParams();
@@ -36,21 +36,13 @@ const Results = () => {
       </div>
 
       <div className="p-8 space-y-8">
-        {/* Glow Score Header */}
-        <div className="flex items-center justify-between p-8 rounded-[48px] bg-[#E8D5D8] text-[#4A3F3F]">
-          <div className="space-y-1">
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-60">Glow Score™</p>
-            <h2 className="text-5xl font-serif">{plan.glow_score}</h2>
-          </div>
-          <div className="text-right space-y-1">
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-60">Moment</p>
-            <p className="font-bold">{moment.moment_type}</p>
-          </div>
-        </div>
+        <StyleCard 
+          score={plan.glow_score} 
+          moment={moment.moment_type.replace('_', ' ')} 
+          direction={plan.look_direction} 
+        />
 
-        {/* Modules */}
         <div className="space-y-6">
-          <PlanModule icon={<Sparkles size={18} />} title="Look Direction" content={plan.look_direction} />
           <PlanModule icon={<Palette size={18} />} title="Color Palette">
             <div className="flex gap-2 mt-3">
               {plan.color_palette.colors.map((c: string) => (
@@ -76,20 +68,6 @@ const Results = () => {
                 <p className="text-sm text-[#4A3F3F]"><span className="font-bold">Framing:</span> {plan.camera_presence.framing}</p>
                 <p className="text-sm text-[#4A3F3F]"><span className="font-bold">Eye Line:</span> {plan.camera_presence.eye_line}</p>
                 <p className="text-xs italic text-[#8C7E7E]">{plan.camera_presence.micro_expressions}</p>
-              </div>
-            </PlanModule>
-          )}
-
-          {plan.voice_delivery && (
-            <PlanModule icon={<Mic2 size={18} />} title="Voice & Delivery">
-              <div className="space-y-3 mt-2">
-                <p className="text-sm text-[#4A3F3F]"><span className="font-bold">Pacing:</span> {plan.voice_delivery.pacing}</p>
-                <div className="p-4 rounded-2xl bg-[#F5F0E1] space-y-2">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-[#8C7E7E]">Warm-ups</p>
-                  {plan.voice_delivery.warmups.map((w: string) => (
-                    <p key={w} className="text-xs text-[#4A3F3F]">{w}</p>
-                  ))}
-                </div>
               </div>
             </PlanModule>
           )}
