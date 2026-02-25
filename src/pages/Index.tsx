@@ -1,21 +1,37 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
-import { Sparkles, Heart, Briefcase, Coffee, Moon, Zap, Star, Camera, Flower2, Stars } from 'lucide-react';
+import { 
+  Sparkles, Heart, Briefcase, Coffee, Moon, Zap, Star, 
+  Camera, Flower2, Stars, MapPin, Sun, Cloud, Clock, 
+  ChevronRight, Image as ImageIcon, X
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-const MOMENTS = [
-  { id: 'first_date', label: 'First Date', icon: <Heart size={24} />, color: 'bg-[#FCE4EC] text-[#D81B60]' },
-  { id: 'job_interview', label: 'Interview', icon: <Briefcase size={24} />, color: 'bg-[#E3F2FD] text-[#1E88E5]' },
-  { id: 'power_meeting', label: 'Meeting', icon: <Zap size={24} />, color: 'bg-[#FFF3E0] text-[#FB8C00]' },
-  { id: 'creator_camera', label: 'Creator', icon: <Stars size={24} />, color: 'bg-[#F3E5F5] text-[#8E24AA]' },
-  { id: 'daytime_casual', label: 'Casual', icon: <Coffee size={24} />, color: 'bg-[#E0F2F1] text-[#00897B]' },
-  { id: 'night_out', label: 'Night Out', icon: <Moon size={24} />, color: 'bg-[#E8EAF6] text-[#3949AB]' },
+const OCCASIONS = [
+  { id: 'work', label: 'Work', icon: <Briefcase size={20} /> },
+  { id: 'date', label: 'Date', icon: <Heart size={20} /> },
+  { id: 'dinner', label: 'Dinner', icon: <Coffee size={20} /> },
+  { id: 'party', label: 'Party', icon: <Stars size={20} /> },
+  { id: 'wedding', label: 'Wedding', icon: <Flower2 size={20} /> },
+  { id: 'errands', label: 'Errands', icon: <MapPin size={20} /> },
+  { id: 'gym', label: 'Gym', icon: <Zap size={20} /> },
+  { id: 'creator', label: 'Creator', icon: <Camera size={20} /> },
 ];
 
 const Index = () => {
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [context, setContext] = useState({
+    occasion: 'work',
+    time: 'Day',
+    formality: 'Smart',
+    weather: 'Mild',
+    vibe: 'Natural'
+  });
+  const [refImage, setRefImage] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -36,75 +52,157 @@ const Index = () => {
       navigate('/onboarding');
     } else {
       setProfile(profileData);
+      setContext(prev => ({ ...prev, vibe: profileData.style_energy || 'Natural' }));
       setLoading(false);
     }
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => setRefImage(reader.result as string);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleBuildLook = () => {
+    // Analiz sayfasına context ve refImage ile git
+    navigate('/look-analysis', { state: { context, refImage } });
   };
 
   if (loading) return null;
 
   return (
-    <div className="p-8 space-y-12 pb-48">
+    <div className="p-8 space-y-10 pb-48">
       <header className="space-y-4 animate-fade-up">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-[#FCE4EC] animate-ping" />
-            <p className="text-[10px] uppercase tracking-[0.4em] text-[#BCAEAE] font-bold">Glowé OS v1.2</p>
+            <p className="text-[10px] uppercase tracking-[0.4em] text-[#BCAEAE] font-bold">Presence OS v1.2</p>
           </div>
           <Flower2 className="text-[#FCE4EC] animate-spin-slow" size={24} />
         </div>
         <h1 className="text-5xl font-serif text-[#4A3F3F] leading-[1.1]">
-          Good morning, <br />
-          <span className="italic text-[#D81B60]">Radiant.</span>
+          Where are you <br />
+          <span className="italic text-[#D81B60]">going today?</span>
         </h1>
       </header>
 
-      <div className="grid grid-cols-2 gap-5">
-        {MOMENTS.map((moment, i) => (
-          <button
-            key={moment.id}
-            onClick={() => navigate(`/moment-intake/${moment.id}`)}
-            style={{ animationDelay: `${i * 100}ms` }}
-            className="p-7 rounded-[40px] bg-white/60 backdrop-blur-md border border-white shadow-[0_10px_30px_rgba(252,228,236,0.3)] text-left space-y-5 hover:scale-[1.02] transition-all group animate-fade-up"
-          >
-            <div className={`w-14 h-14 rounded-[22px] flex items-center justify-center ${moment.color} shadow-inner group-hover:rotate-6 transition-transform duration-500`}>
-              {moment.icon}
-            </div>
-            <p className="font-bold text-sm tracking-tight text-[#4A3F3F]">{moment.label}</p>
-          </button>
-        ))}
-      </div>
-
-      <section className="space-y-6 animate-fade-up" style={{ animationDelay: '600ms' }}>
-        <div className="flex justify-between items-center px-2">
-          <h3 className="font-serif text-2xl text-[#4A3F3F]">Daily Ritual</h3>
-          <Sparkles className="text-[#FCE4EC]" size={20} fill="currentColor" />
+      <section className="space-y-4 animate-fade-up">
+        <p className="text-[9px] font-bold text-[#BCAEAE] uppercase tracking-[0.3em] ml-2">Occasion</p>
+        <div className="grid grid-cols-4 gap-3">
+          {OCCASIONS.map((occ) => (
+            <button
+              key={occ.id}
+              onClick={() => setContext({ ...context, occasion: occ.id })}
+              className={cn(
+                "flex flex-col items-center justify-center p-4 rounded-[24px] border-2 transition-all gap-2",
+                context.occasion === occ.id 
+                  ? "bg-white border-[#D81B60] text-[#D81B60] shadow-lg scale-105" 
+                  : "bg-white border-[#FCE4EC] text-[#BCAEAE]"
+              )}
+            >
+              {occ.icon}
+              <span className="text-[8px] font-bold uppercase tracking-tighter">{occ.label}</span>
+            </button>
+          ))}
         </div>
-        <div className="p-10 rounded-[50px] bg-gradient-to-br from-white to-[#FCE4EC]/20 border border-white shadow-xl space-y-6 relative overflow-hidden">
-          <div className="absolute -top-10 -right-10 w-40 h-40 bg-[#F3E5F5] rounded-full blur-3xl opacity-40" />
-          <div className="flex items-center gap-5 relative z-10">
-            <div className="w-12 h-12 rounded-full bg-white shadow-md flex items-center justify-center text-[#D81B60]">
-              <Star size={22} fill="currentColor" />
-            </div>
-            <div>
-              <p className="font-bold text-[#4A3F3F] text-lg">Soft Alignment</p>
-              <p className="text-[10px] text-[#BCAEAE] uppercase tracking-[0.2em] font-bold">Morning Habit</p>
+      </section>
+
+      <section className="space-y-6 animate-fade-up" style={{ animationDelay: '200ms' }}>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-3">
+            <p className="text-[9px] font-bold text-[#BCAEAE] uppercase tracking-[0.3em] ml-2">Time & Formality</p>
+            <div className="p-6 rounded-[32px] bg-white border border-[#FCE4EC] space-y-4">
+              <div className="flex justify-between items-center">
+                <span className="text-[10px] font-bold text-[#4A3F3F]">Time</span>
+                <button 
+                  onClick={() => setContext({...context, time: context.time === 'Day' ? 'Night' : 'Day'})}
+                  className="text-[10px] font-bold text-[#D81B60] uppercase"
+                >
+                  {context.time}
+                </button>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-[10px] font-bold text-[#4A3F3F]">Style</span>
+                <select 
+                  value={context.formality}
+                  onChange={(e) => setContext({...context, formality: e.target.value})}
+                  className="text-[10px] font-bold text-[#D81B60] uppercase bg-transparent outline-none text-right"
+                >
+                  <option>Casual</option>
+                  <option>Smart</option>
+                  <option>Formal</option>
+                </select>
+              </div>
             </div>
           </div>
-          <p className="text-sm text-[#4A3F3F]/80 leading-relaxed italic relative z-10">
-            "Take 3 deep breaths. Visualize your glow expanding from your core to your fingertips before you step out."
-          </p>
+
+          <div className="space-y-3">
+            <p className="text-[9px] font-bold text-[#BCAEAE] uppercase tracking-[0.3em] ml-2">Weather & Vibe</p>
+            <div className="p-6 rounded-[32px] bg-white border border-[#FCE4EC] space-y-4">
+              <div className="flex justify-between items-center">
+                <span className="text-[10px] font-bold text-[#4A3F3F]">Weather</span>
+                <select 
+                  value={context.weather}
+                  onChange={(e) => setContext({...context, weather: e.target.value})}
+                  className="text-[10px] font-bold text-[#D81B60] uppercase bg-transparent outline-none text-right"
+                >
+                  <option>Hot</option>
+                  <option>Mild</option>
+                  <option>Cold</option>
+                </select>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-[10px] font-bold text-[#4A3F3F]">Vibe</span>
+                <span className="text-[10px] font-bold text-[#D81B60] uppercase">{context.vibe}</span>
+              </div>
+            </div>
+          </div>
         </div>
+      </section>
+
+      <section className="space-y-4 animate-fade-up" style={{ animationDelay: '400ms' }}>
+        <p className="text-[9px] font-bold text-[#BCAEAE] uppercase tracking-[0.3em] ml-2">Inspiration (Optional)</p>
+        <div 
+          onClick={() => !refImage && fileInputRef.current?.click()}
+          className={cn(
+            "h-24 rounded-[32px] border-2 border-dashed flex items-center justify-center transition-all relative overflow-hidden",
+            refImage ? "border-[#D81B60]" : "border-[#FCE4EC] bg-white hover:bg-[#FCE4EC]/10"
+          )}
+        >
+          {refImage ? (
+            <>
+              <img src={refImage} className="w-full h-full object-cover opacity-40" alt="Ref" />
+              <div className="absolute inset-0 flex items-center justify-center gap-2">
+                <ImageIcon size={16} className="text-[#D81B60]" />
+                <span className="text-[10px] font-bold text-[#D81B60] uppercase">Reference Loaded</span>
+              </div>
+              <button 
+                onClick={(e) => { e.stopPropagation(); setRefImage(null); }}
+                className="absolute top-2 right-2 w-6 h-6 bg-white rounded-full flex items-center justify-center text-red-500 shadow-sm"
+              >
+                <X size={12} />
+              </button>
+            </>
+          ) : (
+            <div className="flex items-center gap-3 text-[#BCAEAE]">
+              <ImageIcon size={20} />
+              <span className="text-[10px] font-bold uppercase tracking-widest">Upload Venue or Inspo</span>
+            </div>
+          )}
+        </div>
+        <input type="file" ref={fileInputRef} onChange={handleFileSelect} accept="image/*" className="hidden" />
       </section>
 
       <div className="fixed bottom-28 left-1/2 -translate-x-1/2 w-[88%] max-w-sm z-40">
         <Button 
-          onClick={() => navigate('/try-on')}
+          onClick={handleBuildLook}
           className="w-full h-20 rounded-full bg-[#4A3F3F] text-white text-lg font-bold shadow-[0_20px_50px_rgba(0,0,0,0.2)] hover:bg-black transition-all active:scale-95 flex items-center justify-center gap-4 border-t border-white/10"
         >
-          <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
-            <Camera size={20} />
-          </div>
-          AI Virtual Try-On
+          <Sparkles size={20} />
+          Build My Look
         </Button>
       </div>
     </div>

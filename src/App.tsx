@@ -19,6 +19,8 @@ import Wardrobe from "./pages/Wardrobe";
 import WardrobeAdd from "./pages/WardrobeAdd";
 import Today from "./pages/Today";
 import Outfits from "./pages/Outfits";
+import LookAnalysis from "./pages/LookAnalysis";
+import LookResult from "./pages/LookResult";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -46,6 +48,8 @@ const App = () => (
             <Route path="/wardrobe/add" element={<WardrobeAdd />} />
             <Route path="/today" element={<Today />} />
             <Route path="/outfits" element={<Outfits />} />
+            <Route path="/look-analysis" element={<LookAnalysis />} />
+            <Route path="/look-result/:id" element={<LookResult />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
