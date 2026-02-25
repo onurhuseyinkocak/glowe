@@ -2,107 +2,117 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
-import { Share2, Copy, ChevronLeft, Sparkles, Palette } from 'lucide-react';
-import { showSuccess, showError } from '@/utils/toast';
-import confetti from 'canvas-confetti';
+import { Share2, ChevronLeft, Sparkles, Palette, CheckCircle2, Video, Mic2, User } from 'lucide-react';
+import { showSuccess } from '@/utils/toast';
 
 const Results = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [analysis, setAnalysis] = useState<any>(null);
+  const [moment, setMoment] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchAnalysis();
+    fetchMoment();
   }, [id]);
 
-  const fetchAnalysis = async () => {
-    const { data, error } = await supabase.from('analyses').select('*, users_profile(*)').eq('id', id).single();
-    if (error) { showError('Moment not found'); navigate('/'); return; }
-    setAnalysis(data);
+  const fetchMoment = async () => {
+    const { data } = await supabase.from('moments').select('*').eq('id', id).single();
+    setMoment(data);
     setLoading(false);
-    confetti({ particleCount: 40, spread: 60, origin: { y: 0.8 }, colors: ['#E8D5D8', '#D1C4E9', '#F5F0E1'] });
   };
 
-  if (loading) return null;
+  if (loading || !moment) return null;
 
-  const isCovered = analysis.hair_coverage === 'covered';
+  const plan = moment.plan_json;
 
   return (
-    <div className="min-h-screen bg-[#FFFBFA] pb-24">
+    <div className="min-h-screen bg-[#FFFBFA] pb-32">
       <div className="p-6 flex items-center justify-between bg-white/50 backdrop-blur-md sticky top-0 z-50">
-        <button onClick={() => navigate('/')} className="p-2 hover:bg-[#F5F0E1] rounded-full transition-colors">
+        <button onClick={() => navigate('/')} className="p-2 hover:bg-[#F5F0E1] rounded-full">
           <ChevronLeft size={24} />
         </button>
-        <h1 className="font-serif text-xl text-[#4A3F3F]">Your Glowé Plan</h1>
+        <h1 className="font-serif text-xl text-[#4A3F3F]">Moment Plan</h1>
         <div className="w-10" />
       </div>
 
-      <div className="p-8 space-y-10">
-        {/* Glow Score Badge */}
-        <div className="flex flex-col items-center space-y-4">
-          <div className="relative w-32 h-32 flex items-center justify-center">
-            <svg className="w-full h-full -rotate-90">
-              <circle cx="64" cy="64" r="60" fill="none" stroke="#F5F0E1" strokeWidth="8" />
-              <circle cx="64" cy="64" r="60" fill="none" stroke="#E8D5D8" strokeWidth="8" strokeDasharray="377" strokeDashoffset={377 - (377 * (analysis.glow_score || 85)) / 100} strokeLinecap="round" />
-            </svg>
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-3xl font-serif font-bold text-[#4A3F3F]">{analysis.glow_score || 85}</span>
-              <span className="text-[8px] font-bold uppercase tracking-widest text-[#8C7E7E]">Glow Score™</span>
-            </div>
+      <div className="p-8 space-y-8">
+        {/* Glow Score Header */}
+        <div className="flex items-center justify-between p-8 rounded-[48px] bg-[#E8D5D8] text-[#4A3F3F]">
+          <div className="space-y-1">
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-60">Glow Score™</p>
+            <h2 className="text-5xl font-serif">{plan.glow_score}</h2>
           </div>
-          <div className="text-center space-y-1">
-            <h2 className="text-2xl font-serif text-[#4A3F3F]">{analysis.glow_face_shape || 'Oval'} Harmony</h2>
-            <p className="text-xs text-[#8C7E7E] uppercase tracking-widest font-bold">{analysis.event_type || 'Special Event'} Mode</p>
+          <div className="text-right space-y-1">
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-60">Moment</p>
+            <p className="font-bold">{moment.moment_type}</p>
           </div>
         </div>
 
-        {/* Glow Direction Sections */}
+        {/* Modules */}
         <div className="space-y-6">
-          <GlowSection 
-            title={isCovered ? "Styling Direction" : "Hair Direction"} 
-            content={isCovered ? analysis.styling_direction : (analysis.best_cut || 'Soft waves with a center part to frame your features.')} 
-            icon={<Sparkles size={18} />}
-          />
-          
-          <div className="p-8 rounded-[40px] bg-[#F5F0E1] space-y-4">
-            <div className="flex items-center gap-3 text-[#4A3F3F]">
-              <Palette size={18} />
-              <h3 className="font-bold text-sm uppercase tracking-widest">{isCovered ? "Fabric Palette" : "Color Palette"}</h3>
-            </div>
-            <div className="flex gap-3">
-              {['#E8D5D8', '#D1C4E9', '#4A3F3F', '#F5F0E1'].map(c => (
-                <div key={c} className="w-12 h-12 rounded-2xl shadow-inner" style={{ backgroundColor: c }} />
+          <PlanModule icon={<Sparkles size={18} />} title="Look Direction" content={plan.look_direction} />
+          <PlanModule icon={<Palette size={18} />} title="Color Palette">
+            <div className="flex gap-2 mt-3">
+              {plan.color_palette.colors.map((c: string) => (
+                <div key={c} className="w-10 h-10 rounded-xl shadow-inner" style={{ backgroundColor: c }} />
               ))}
             </div>
-            <p className="text-sm text-[#8C7E7E] leading-relaxed italic">
-              {isCovered 
-                ? `"These fabric tones will harmonize with your skin and enhance your natural radiance."`
-                : `"These tones will enhance your natural radiance for this ${analysis.event_type}."`}
-            </p>
-          </div>
+            <p className="text-[10px] text-[#8C7E7E] mt-3 uppercase tracking-widest">Avoid: {plan.color_palette.avoid.join(', ')}</p>
+          </PlanModule>
+          
+          <PlanModule icon={<User size={18} />} title={plan.styling.title} content={plan.styling.content}>
+            <ul className="mt-3 space-y-2">
+              {plan.styling.tips.map((t: string) => (
+                <li key={t} className="text-xs text-[#8C7E7E] flex items-center gap-2">
+                  <div className="w-1 h-1 rounded-full bg-[#E8D5D8]" /> {t}
+                </li>
+              ))}
+            </ul>
+          </PlanModule>
 
-          <GlowSection 
-            title="Makeup & Vibe" 
-            content={analysis.makeup_direction || 'Luminous skin with a soft rose lip. Keep the eyes natural but defined.'} 
-            icon={<Sparkles size={18} />}
-          />
+          {plan.camera_presence && (
+            <PlanModule icon={<Video size={18} />} title="Camera Presence">
+              <div className="space-y-3 mt-2">
+                <p className="text-sm text-[#4A3F3F]"><span className="font-bold">Framing:</span> {plan.camera_presence.framing}</p>
+                <p className="text-sm text-[#4A3F3F]"><span className="font-bold">Eye Line:</span> {plan.camera_presence.eye_line}</p>
+                <p className="text-xs italic text-[#8C7E7E]">{plan.camera_presence.micro_expressions}</p>
+              </div>
+            </PlanModule>
+          )}
+
+          {plan.voice_delivery && (
+            <PlanModule icon={<Mic2 size={18} />} title="Voice & Delivery">
+              <div className="space-y-3 mt-2">
+                <p className="text-sm text-[#4A3F3F]"><span className="font-bold">Pacing:</span> {plan.voice_delivery.pacing}</p>
+                <div className="p-4 rounded-2xl bg-[#F5F0E1] space-y-2">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-[#8C7E7E]">Warm-ups</p>
+                  {plan.voice_delivery.warmups.map((w: string) => (
+                    <p key={w} className="text-xs text-[#4A3F3F]">{w}</p>
+                  ))}
+                </div>
+              </div>
+            </PlanModule>
+          )}
+
+          <PlanModule icon={<CheckCircle2 size={18} />} title="Quick Checklist">
+            <div className="grid gap-2 mt-3">
+              {plan.checklist.map((item: string) => (
+                <div key={item} className="flex items-center gap-3 p-4 rounded-2xl border border-[#F5F0E1] bg-white">
+                  <div className="w-5 h-5 rounded-full border-2 border-[#E8D5D8]" />
+                  <span className="text-sm text-[#4A3F3F]">{item}</span>
+                </div>
+              ))}
+            </div>
+          </PlanModule>
         </div>
 
-        <div className="bg-white p-8 rounded-[40px] border border-[#F5F0E1] text-center space-y-3">
-          <p className="text-sm text-[#4A3F3F] leading-relaxed font-serif italic">
-            "You are already radiant. This plan is simply a mirror to your best self."
-          </p>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-4 pt-6">
           <Button className="h-16 rounded-full bg-[#4A3F3F] text-white font-bold shadow-lg">
             <Share2 className="mr-2" size={18} />
-            Share Plan
+            Share Card
           </Button>
-          <Button variant="outline" onClick={() => { navigator.clipboard.writeText(analysis.styling_direction || analysis.best_cut); showSuccess('Copied to clipboard'); }} className="h-16 rounded-full border-2 border-[#F5F0E1] font-bold text-[#4A3F3F]">
-            <Copy className="mr-2" size={18} />
-            Copy Details
+          <Button variant="outline" onClick={() => navigate('/')} className="h-16 rounded-full border-2 border-[#F5F0E1] font-bold text-[#4A3F3F]">
+            Done
           </Button>
         </div>
       </div>
@@ -110,13 +120,14 @@ const Results = () => {
   );
 };
 
-const GlowSection = ({ title, content, icon }: { title: string, content: string, icon: React.ReactNode }) => (
+const PlanModule = ({ icon, title, content, children }: any) => (
   <div className="p-8 rounded-[40px] bg-white border border-[#F5F0E1] space-y-3">
     <div className="flex items-center gap-3 text-[#E8D5D8]">
       {icon}
       <h3 className="font-bold text-sm uppercase tracking-widest text-[#4A3F3F]">{title}</h3>
     </div>
-    <p className="text-[#8C7E7E] leading-relaxed">{content}</p>
+    {content && <p className="text-sm text-[#8C7E7E] leading-relaxed">{content}</p>}
+    {children}
   </div>
 );
 

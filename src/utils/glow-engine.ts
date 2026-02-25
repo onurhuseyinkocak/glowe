@@ -1,94 +1,102 @@
 export type FaceShape = 'Oval' | 'Round' | 'Square' | 'Heart' | 'Diamond' | 'Oblong';
 export type HairCoverage = 'visible' | 'partial' | 'covered' | 'unspecified';
 
-export interface GlowPlan {
-  face_shape: FaceShape;
-  glow_score: number;
-  harmony_insight: string;
+export interface MomentPlan {
+  look_direction: string;
+  makeup_grooming: string;
   styling: {
     title: string;
     content: string;
+    tips: string[];
   };
-  makeup_vibe: string;
-  color_palette: string[];
-  outfit_energy: string;
-  event_tips: string;
+  color_palette: {
+    colors: string[];
+    avoid: string[];
+  };
+  posture_presence: string[];
+  camera_presence?: {
+    framing: string;
+    eye_line: string;
+    micro_expressions: string;
+  };
+  voice_delivery?: {
+    pacing: string;
+    warmups: string[];
+  };
+  checklist: string[];
+  glow_score: number;
 }
 
-const FACE_SHAPES: FaceShape[] = ['Oval', 'Round', 'Square', 'Heart', 'Diamond', 'Oblong'];
+export const generateMomentPlan = (
+  baseline: any,
+  momentType: string,
+  modifiers: any
+): MomentPlan => {
+  const isCreator = momentType.includes('Creator');
+  const isCovered = baseline.hair_coverage === 'covered';
+  
+  // Deterministik seed
+  const seed = (momentType.length + baseline.identity.length) % 10;
+  const glowScore = 82 + seed;
 
-export const generateGlowPlan = (
-  identity: string,
-  event: string,
-  energy: string,
-  coverage: HairCoverage
-): GlowPlan => {
-  // Deterministik sonuç için girdilerden bir seed oluşturuyoruz (basit simülasyon)
-  const seed = (identity.length + event.length + energy.length + coverage.length) % FACE_SHAPES.length;
-  const faceShape = FACE_SHAPES[seed];
-  const glowScore = 85 + (seed % 15); // 85-100 arası tutarlı skor
-
-  const isCovered = coverage === 'covered';
-
-  const plan: GlowPlan = {
-    face_shape: faceShape,
+  const plan: MomentPlan = {
     glow_score: glowScore,
-    harmony_insight: `Your ${faceShape} structure provides a naturally balanced canvas for ${energy} expressions.`,
+    look_direction: getLookDirection(momentType, baseline.presentation_goal),
+    makeup_grooming: getMakeupGrooming(momentType, baseline.beauty_comfort, baseline.identity),
     styling: {
-      title: isCovered ? "Styling Direction" : "Hair Direction",
-      content: isCovered 
-        ? getCoveredStyling(event, energy)
-        : getVisibleHairStyling(event, energy, faceShape)
+      title: isCovered ? "Styling & Framing" : "Hair Direction",
+      content: isCovered ? getCoveredStyling(momentType) : getVisibleHairStyling(momentType),
+      tips: isCovered ? ["Focus on undercap volume", "Ensure fabric harmony"] : ["Soft waves", "Natural part"]
     },
-    makeup_vibe: getMakeupVibe(event, energy, identity),
-    color_palette: getColorPalette(energy),
-    outfit_energy: getOutfitEnergy(event, energy),
-    event_tips: getEventTips(event)
+    color_palette: {
+      colors: ['#E8D5D8', '#F5F0E1', '#4A3F3F', '#D1C4E9', '#FFFFFF'],
+      avoid: ['Neon Yellow', 'Harsh Grey']
+    },
+    posture_presence: [
+      "Shoulders back and down",
+      "Chin parallel to floor",
+      "Open palm gestures"
+    ],
+    checklist: [
+      "Check lighting source",
+      "Hydrate 15 mins before",
+      "Final mirror check",
+      "Deep breath (4-7-8)"
+    ]
   };
+
+  if (isCreator) {
+    plan.camera_presence = {
+      framing: modifiers.framing || "Head & Shoulders",
+      eye_line: "Level with lens",
+      micro_expressions: "Soft smile between points"
+    };
+    plan.voice_delivery = {
+      pacing: "Measured & intentional",
+      warmups: ["Lip trills (30s)", "Humming scale"]
+    };
+  }
 
   return plan;
 };
 
-const getCoveredStyling = (event: string, energy: string) => {
-  if (event === 'Job Interview') return "Structured wrap with a neutral palette. Focus on a polished silhouette and balanced volume.";
-  if (event === 'First Date') return "Soft face framing with elegant draping. Use warm, radiant fabric tones to enhance your glow.";
-  return "Refined layering with satin textures. Focus on highlight balance and sophisticated volume.";
+const getLookDirection = (moment: string, goal: string) => {
+  if (moment === 'Job Interview') return `A ${goal.toLowerCase()} professional silhouette with clean lines.`;
+  if (moment === 'First Date') return `Soft, approachable ${goal.toLowerCase()} textures.`;
+  return `Balanced ${goal.toLowerCase()} energy for this moment.`;
 };
 
-const getVisibleHairStyling = (event: string, energy: string, shape: string) => {
-  if (event === 'Job Interview') return "Polished low bun or a structured bob to emphasize professional clarity.";
-  return "Soft romantic waves with natural volume to soften the jawline and add radiance.";
-};
-
-const getMakeupVibe = (event: string, energy: string, identity: string) => {
+const getMakeupGrooming = (moment: string, comfort: string, identity: string) => {
   const base = identity === 'Man' ? "Grooming" : "Makeup";
-  if (event === 'First Date') return `${base}: Dewy skin, soft flush, and a hint of shimmer for a radiant look.`;
-  return `${base}: Matte finish, neutral tones, and confident definition.`;
+  return `${base}: ${comfort} intensity. Focus on skin radiance and eye definition.`;
 };
 
-const getColorPalette = (energy: string) => {
-  const palettes: Record<string, string[]> = {
-    'Soft': ['#E8D5D8', '#F5F0E1', '#D1C4E9', '#FFFFFF', '#BCAAA4'],
-    'Bold': ['#4A3F3F', '#E8D5D8', '#FFAB91', '#263238', '#D84315'],
-    'Elegant': ['#4A3F3F', '#F5F0E1', '#CFD8DC', '#90A4AE', '#263238'],
-    'Natural': ['#BCAAA4', '#F5F0E1', '#A5D6A7', '#E8F5E9', '#795548'],
-    'Trendy': ['#D1C4E9', '#F48FB1', '#80CBC4', '#E8D5D8', '#4A3F3F']
-  };
-  return palettes[energy] || palettes['Soft'];
+const getCoveredStyling = (moment: string) => {
+  if (moment === 'Power Meeting') return "Structured wrap with silk-blend fabric.";
+  return "Soft draping with jersey or chiffon for a natural frame.";
 };
 
-const getOutfitEnergy = (event: string, energy: string) => {
-  return `A ${energy.toLowerCase()} silhouette that balances comfort with ${event.toLowerCase()} expectations.`;
-};
-
-const getEventTips = (event: string) => {
-  const tips: Record<string, string> = {
-    'First Date': "Focus on eye contact and a warm smile. Your glow comes from within.",
-    'Job Interview': "Posture is key. Let your appearance reflect your competence.",
-    'Wedding': "Luminous textures work best under celebration lighting.",
-    'Girls Night': "Experiment with one bold element to spark joy.",
-    'Power Meeting': "Clean lines and minimal distractions command the room.",
-    'Glow-Up Reset': "Today is about you. Take time to appreciate your progress."
-  };
-  return tips[event] || "Stay present and embrace your natural radiance.";
+const getVisibleHairStyling = (moment: string) => {
+  if (moment === 'Night Out') return "High-shine finish with soft volume.";
+  return "Natural texture with minimal flyaways.";
 };
