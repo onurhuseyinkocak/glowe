@@ -1,22 +1,20 @@
 import { useLocation } from "react-router-dom";
-import { useEffect } from "react";
 
 const NotFound = () => {
   const location = useLocation();
 
-  useEffect(() => {
-    console.error(
-      "404 Error: User attempted to access non-existent route:",
-      location.pathname,
-    );
-  }, [location.pathname]);
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">404</h1>
-        <p className="text-xl text-gray-600 mb-4">Oops! Page not found</p>
-        <a href="/" className="text-blue-500 hover:text-blue-700 underline">
+    <div className="min-h-screen flex items-center justify-center bg-[#FFFBFA]">
+      <div className="text-center space-y-6 p-8">
+        <h1 className="text-8xl font-serif text-[#E8D5D8]">404</h1>
+        <div className="space-y-2">
+          <p className="text-xl font-serif text-[#4A3F3F]">Moment not found</p>
+          <p className="text-sm text-[#8C7E7E]">The path {location.pathname} does not exist in your Glowé journey.</p>
+        </div>
+        <a 
+          href="/" 
+          className="inline-block px-8 py-4 rounded-full bg-[#4A3F3F] text-white font-bold text-sm shadow-lg hover:bg-[#2D2424] transition-all"
+        >
           Return to Home
         </a>
       </div>
