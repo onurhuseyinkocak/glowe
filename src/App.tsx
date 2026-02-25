@@ -16,6 +16,7 @@ import BarberDetail from "./pages/BarberDetail";
 import Favorites from "./pages/Favorites";
 import VirtualTryOn from "./pages/VirtualTryOn";
 import Wardrobe from "./pages/Wardrobe";
+import WardrobeAdd from "./pages/WardrobeAdd";
 import Today from "./pages/Today";
 import Outfits from "./pages/Outfits";
 import NotFound from "./pages/NotFound";
@@ -42,6 +43,7 @@ const App = () => (
             <Route path="/favorites" element={<Favorites />} />
             <Route path="/try-on" element={<VirtualTryOn />} />
             <Route path="/wardrobe" element={<Wardrobe />} />
+            <Route path="/wardrobe/add" element={<WardrobeAdd />} />
             <Route path="/today" element={<Today />} />
             <Route path="/outfits" element={<Outfits />} />
           </Route>
