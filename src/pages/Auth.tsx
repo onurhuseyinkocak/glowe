@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { showError, showSuccess } from '@/utils/toast';
-import { Chrome, Apple, Mail } from 'lucide-react';
+import { Chrome, Mail } from 'lucide-react';
 
 const Auth = () => {
   const [email, setEmail] = useState('');
@@ -14,7 +14,7 @@ const Auth = () => {
   const [isSignUp, setIsSignUp] = useState(false);
   const navigate = useNavigate();
 
-  const handleSocialLogin = async (provider: 'google' | 'apple') => {
+  const handleSocialLogin = async (provider: 'google') => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
@@ -60,14 +60,6 @@ const Auth = () => {
           >
             <Chrome size={20} />
             Continue with Google
-          </Button>
-          <Button 
-            onClick={() => handleSocialLogin('apple')}
-            variant="outline" 
-            className="w-full h-14 rounded-full border-[#F5F0E1] bg-white text-[#4A3F3F] font-bold gap-3 shadow-sm hover:bg-gray-50"
-          >
-            <Apple size={20} />
-            Continue with Apple
           </Button>
         </div>
 
