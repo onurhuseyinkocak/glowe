@@ -26,6 +26,8 @@ const Results = () => {
 
   if (loading) return null;
 
+  const isCovered = analysis.hair_coverage === 'covered';
+
   return (
     <div className="min-h-screen bg-[#FFFBFA] pb-24">
       <div className="p-6 flex items-center justify-between bg-white/50 backdrop-blur-md sticky top-0 z-50">
@@ -58,22 +60,26 @@ const Results = () => {
         {/* Glow Direction Sections */}
         <div className="space-y-6">
           <GlowSection 
-            title="Hair Direction" 
-            content={analysis.best_cut || 'Soft waves with a center part to frame your features.'} 
+            title={isCovered ? "Styling Direction" : "Hair Direction"} 
+            content={isCovered ? analysis.styling_direction : (analysis.best_cut || 'Soft waves with a center part to frame your features.')} 
             icon={<Sparkles size={18} />}
           />
           
           <div className="p-8 rounded-[40px] bg-[#F5F0E1] space-y-4">
             <div className="flex items-center gap-3 text-[#4A3F3F]">
               <Palette size={18} />
-              <h3 className="font-bold text-sm uppercase tracking-widest">Color Palette</h3>
+              <h3 className="font-bold text-sm uppercase tracking-widest">{isCovered ? "Fabric Palette" : "Color Palette"}</h3>
             </div>
             <div className="flex gap-3">
               {['#E8D5D8', '#D1C4E9', '#4A3F3F', '#F5F0E1'].map(c => (
                 <div key={c} className="w-12 h-12 rounded-2xl shadow-inner" style={{ backgroundColor: c }} />
               ))}
             </div>
-            <p className="text-sm text-[#8C7E7E] leading-relaxed italic">"These tones will enhance your natural radiance for this {analysis.event_type}."</p>
+            <p className="text-sm text-[#8C7E7E] leading-relaxed italic">
+              {isCovered 
+                ? `"These fabric tones will harmonize with your skin and enhance your natural radiance."`
+                : `"These tones will enhance your natural radiance for this ${analysis.event_type}."`}
+            </p>
           </div>
 
           <GlowSection 
@@ -94,7 +100,7 @@ const Results = () => {
             <Share2 className="mr-2" size={18} />
             Share Plan
           </Button>
-          <Button variant="outline" onClick={() => { navigator.clipboard.writeText(analysis.barber_instructions); showSuccess('Copied to clipboard'); }} className="h-16 rounded-full border-2 border-[#F5F0E1] font-bold text-[#4A3F3F]">
+          <Button variant="outline" onClick={() => { navigator.clipboard.writeText(analysis.styling_direction || analysis.best_cut); showSuccess('Copied to clipboard'); }} className="h-16 rounded-full border-2 border-[#F5F0E1] font-bold text-[#4A3F3F]">
             <Copy className="mr-2" size={18} />
             Copy Details
           </Button>

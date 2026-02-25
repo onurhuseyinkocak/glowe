@@ -25,12 +25,26 @@ const Analysis = () => {
       const faceShapes = ['Oval', 'Square', 'Round', 'Heart', 'Diamond'];
       const faceShape = faceShapes[Math.floor(Math.random() * faceShapes.length)];
       const score = 88 + Math.floor(Math.random() * 10);
+      const isCovered = analysis.users_profile.hair_coverage === 'covered';
+
+      let stylingDirection = '';
+      if (isCovered) {
+        if (analysis.event_type === 'Job Interview') {
+          stylingDirection = 'Structured wrap with a neutral palette. Focus on a polished silhouette and balanced volume.';
+        } else if (analysis.event_type === 'First Date') {
+          stylingDirection = 'Soft face framing with elegant draping. Use warm, radiant fabric tones to enhance your glow.';
+        } else {
+          stylingDirection = 'Refined layering with satin textures. Focus on highlight balance and sophisticated volume.';
+        }
+      }
 
       await supabase.from('analyses').update({
         status: 'done',
         glow_face_shape: faceShape,
         glow_score: score,
-        best_cut: analysis.event_type === 'Job Interview' ? 'Polished low bun or structured bob.' : 'Soft romantic waves with natural volume.',
+        hair_coverage: analysis.users_profile.hair_coverage,
+        best_cut: isCovered ? null : (analysis.event_type === 'Job Interview' ? 'Polished low bun or structured bob.' : 'Soft romantic waves with natural volume.'),
+        styling_direction: isCovered ? stylingDirection : null,
         makeup_direction: analysis.event_type === 'First Date' ? 'Dewy skin, soft flush, and a hint of shimmer.' : 'Matte finish, neutral tones, and confident brows.',
         why_it_works: `Your ${faceShape} features are naturally balanced. We're enhancing that symmetry for your ${analysis.event_type}.`
       }).eq('id', id);

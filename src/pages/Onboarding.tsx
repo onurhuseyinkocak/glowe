@@ -5,12 +5,13 @@ import { Button } from '@/components/ui/button';
 import { ChevronRight, ChevronLeft } from 'lucide-react';
 import { showError } from '@/utils/toast';
 
-const STEPS = 3;
+const STEPS = 4;
 
 const Onboarding = () => {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     identity: '',
+    hair_coverage: '',
     target_event: '',
     style_energy: ''
   });
@@ -41,7 +42,7 @@ const Onboarding = () => {
       <div className="flex justify-center mb-12">
         <div className="flex gap-2">
           {[...Array(STEPS)].map((_, i) => (
-            <div key={i} className={`h-1 w-12 rounded-full transition-all duration-500 ${i + 1 <= step ? 'bg-[#E8D5D8]' : 'bg-[#F5F0E1]'}`} />
+            <div key={i} className={`h-1 w-10 rounded-full transition-all duration-500 ${i + 1 <= step ? 'bg-[#E8D5D8]' : 'bg-[#F5F0E1]'}`} />
           ))}
         </div>
       </div>
@@ -69,6 +70,30 @@ const Onboarding = () => {
         {step === 2 && (
           <div className="space-y-8 animate-fade-up">
             <div className="space-y-2">
+              <h2 className="text-4xl font-serif text-[#4A3F3F]">How do you usually style your hair?</h2>
+              <p className="text-[#8C7E7E]">This helps us refine your framing and harmony.</p>
+            </div>
+            <div className="grid gap-3">
+              {[
+                { label: 'Hair visible', value: 'visible' },
+                { label: 'Covered sometimes', value: 'partial' },
+                { label: 'Covered most of the time', value: 'covered' },
+                { label: 'Prefer not to say', value: 'unspecified' }
+              ].map((opt) => (
+                <OptionButton 
+                  key={opt.value} 
+                  label={opt.label} 
+                  selected={formData.hair_coverage === opt.value} 
+                  onClick={() => setFormData({...formData, hair_coverage: opt.value})} 
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {step === 3 && (
+          <div className="space-y-8 animate-fade-up">
+            <div className="space-y-2">
               <h2 className="text-4xl font-serif text-[#4A3F3F]">What moment are you preparing for?</h2>
               <p className="text-[#8C7E7E]">Every occasion has its own light.</p>
             </div>
@@ -85,7 +110,7 @@ const Onboarding = () => {
           </div>
         )}
 
-        {step === 3 && (
+        {step === 4 && (
           <div className="space-y-8 animate-fade-up">
             <div className="space-y-2">
               <h2 className="text-4xl font-serif text-[#4A3F3F]">Define your style energy.</h2>
@@ -113,7 +138,12 @@ const Onboarding = () => {
         )}
         <Button 
           onClick={handleNext} 
-          disabled={step === 1 ? !formData.identity : step === 2 ? !formData.target_event : !formData.style_energy}
+          disabled={
+            (step === 1 && !formData.identity) || 
+            (step === 2 && !formData.hair_coverage) || 
+            (step === 3 && !formData.target_event) || 
+            (step === 4 && !formData.style_energy)
+          }
           className="flex-1 h-16 rounded-full bg-[#E8D5D8] text-[#4A3F3F] hover:bg-[#D8C5C8] text-lg font-bold"
         >
           {step === STEPS ? 'Reveal My Glow' : 'Continue'}
