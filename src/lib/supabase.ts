@@ -9,16 +9,14 @@ export const supabase = createClient(
 );
 
 /**
- * Auth yönlendirmeleri için doğru URL'i döner.
- * Vercel'de VITE_SITE_URL tanımlı olmalıdır.
+ * Auth yönlendirmeleri için mevcut tarayıcı adresini döner.
+ * Bu sayede Vercel, Dyad Preview veya Localhost fark etmeksizin doğru yere döner.
  */
 export const getURL = () => {
-  let url =
-    import.meta.env.VITE_SITE_URL ?? // Vercel'de tanımladığın ana URL
-    window.location.origin ?? // Tarayıcıdaki mevcut adres
-    'http://localhost:8080';
+  // window.location.origin o anki tam adresi (https://glowe.vercel.app gibi) verir
+  let url = window.location.origin;
   
-  // URL'in sonunda / olduğundan emin ol (Supabase standardı)
+  // URL'in sonunda / olduğundan emin ol
   url = url.endsWith('/') ? url : `${url}/`;
   return url;
 };
