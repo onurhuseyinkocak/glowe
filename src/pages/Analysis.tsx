@@ -20,12 +20,12 @@ const Analysis = () => {
 
   const processAnalysis = async () => {
     try {
-      // Simüle edilmiş analiz süresi (6 saniye)
-      await new Promise(resolve => setTimeout(resolve, 6000));
+      // Simüle edilmiş analiz süresi
+      await new Promise(resolve => setTimeout(resolve, 4000));
       
-      const { data: analysis, error: fetchError } = await supabase
-        .from('analyses')
-        .select('*, users_profile(*)')
+      const { data: moment, error: fetchError } = await supabase
+        .from('moments')
+        .select('*, user_baseline(*)')
         .eq('id', id)
         .single();
       
@@ -33,20 +33,14 @@ const Analysis = () => {
 
       // Glow Engine ile planı oluştur
       const plan = generateGlowPlan(
-        analysis.users_profile.identity,
-        analysis.event_type,
-        analysis.style_energy,
-        analysis.users_profile.hair_coverage
+        moment.user_baseline,
+        moment.moment_type,
+        moment.context_modifiers
       );
 
-      const { error: updateError } = await supabase.from('analyses').update({
-        status: 'done',
-        glow_face_shape: plan.face_shape,
+      const { error: updateError } = await supabase.from('moments').update({
         glow_score: plan.glow_score,
-        plan_json: plan,
-        best_cut: plan.styling.content, // Geriye dönük uyumluluk için
-        makeup_direction: plan.makeup_vibe,
-        why_it_works: plan.harmony_insight
+        plan_json: plan
       }).eq('id', id);
 
       if (updateError) throw updateError;

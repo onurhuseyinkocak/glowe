@@ -27,22 +27,22 @@ export interface MomentPlan {
   glow_score: number;
 }
 
-export const generateMomentPlan = (
+export const generateGlowPlan = (
   baseline: any,
   momentType: string,
   modifiers: any
 ): MomentPlan => {
-  const isCreator = momentType.includes('Creator');
-  const isCovered = baseline.hair_coverage === 'covered';
+  const isCreator = momentType?.includes('Creator');
+  const isCovered = baseline?.hair_coverage === 'covered';
   
   // Deterministik seed
-  const seed = (momentType.length + baseline.identity.length) % 10;
+  const seed = ((momentType?.length || 0) + (baseline?.identity?.length || 0)) % 10;
   const glowScore = 82 + seed;
 
   const plan: MomentPlan = {
     glow_score: glowScore,
-    look_direction: getLookDirection(momentType, baseline.presentation_goal),
-    makeup_grooming: getMakeupGrooming(momentType, baseline.beauty_comfort, baseline.identity),
+    look_direction: getLookDirection(momentType, baseline?.presentation_goal || 'Balanced'),
+    makeup_grooming: getMakeupGrooming(momentType, baseline?.beauty_comfort || 'Minimal', baseline?.identity || 'Woman'),
     styling: {
       title: isCovered ? "Styling & Framing" : "Hair Direction",
       content: isCovered ? getCoveredStyling(momentType) : getVisibleHairStyling(momentType),
@@ -67,7 +67,7 @@ export const generateMomentPlan = (
 
   if (isCreator) {
     plan.camera_presence = {
-      framing: modifiers.framing || "Head & Shoulders",
+      framing: modifiers?.framing || "Head & Shoulders",
       eye_line: "Level with lens",
       micro_expressions: "Soft smile between points"
     };
