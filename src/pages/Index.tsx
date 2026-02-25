@@ -34,7 +34,7 @@ const Index = () => {
   if (loading) return null;
 
   return (
-    <div className="p-8 space-y-10 bg-[#FFFBFA] min-h-screen pb-44">
+    <div className="p-8 space-y-10 bg-[#FFFBFA] min-h-screen pb-48">
       <header className="space-y-2 animate-fade-up">
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
@@ -81,8 +81,8 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Fixed Action Button - Adjusted for new Nav Bar */}
-      <div className="fixed bottom-24 left-1/2 -translate-x-1/2 w-[85%] max-w-sm z-40">
+      {/* Fixed Action Button - Spacing adjusted for Nav Bar */}
+      <div className="fixed bottom-28 left-1/2 -translate-x-1/2 w-[85%] max-w-sm z-40">
         <Button 
           onClick={() => navigate('/try-on')}
           className="w-full h-16 rounded-full bg-[#4A3F3F] text-white text-lg font-bold shadow-2xl shadow-black/20 hover:bg-[#2D2424] transition-all active:scale-95 flex items-center justify-center gap-3"

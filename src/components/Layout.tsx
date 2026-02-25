@@ -16,7 +16,7 @@ const Layout = () => {
       </main>
 
       {/* Modern, Solid Navigation Bar */}
-      <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white border-t border-[#F5F0E1] px-6 py-4 z-50 shadow-[0_-10px_40px_rgba(0,0,0,0.02)]">
+      <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white border-t border-[#F5F0E1] px-6 py-4 z-50 shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
         <div className="flex justify-between items-center max-w-sm mx-auto">
           <TabLink to="/" icon={<Home size={22} />} label="Home" />
           <TabLink to="/history" icon={<History size={22} />} label="Moments" />
@@ -42,7 +42,7 @@ const TabLink = ({ to, icon, label }: { to: string; icon: React.ReactNode; label
     {({ isActive }) => (
       <>
         <div className={cn(
-          "p-1 rounded-xl transition-all duration-300",
+          "p-1.5 rounded-xl transition-all duration-300",
           isActive && "bg-[#F5F0E1] scale-110"
         )}>
           {icon}
