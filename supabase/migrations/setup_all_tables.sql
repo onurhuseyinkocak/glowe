@@ -1,7 +1,7 @@
 -- Uzantılar
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- 1. Kullanıcı Profilleri (Genişletilmiş)
+-- 1. Tabloları Oluştur (IF NOT EXISTS ile güvenli)
 CREATE TABLE IF NOT EXISTS public.users_profile (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
@@ -15,7 +15,6 @@ CREATE TABLE IF NOT EXISTS public.users_profile (
     UNIQUE(user_id)
 );
 
--- 2. Onboarding / Baseline (Derinlemesine)
 CREATE TABLE IF NOT EXISTS public.user_baseline (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
@@ -32,7 +31,6 @@ CREATE TABLE IF NOT EXISTS public.user_baseline (
     UNIQUE(user_id)
 );
 
--- 3. Moments & Analizler
 CREATE TABLE IF NOT EXISTS public.moments (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
@@ -44,7 +42,6 @@ CREATE TABLE IF NOT EXISTS public.moments (
     created_at TIMESTAMPTZ DEFAULT now()
 );
 
--- 4. Berberler & Salonlar
 CREATE TABLE IF NOT EXISTS public.barbers (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     name TEXT NOT NULL,
@@ -53,7 +50,7 @@ CREATE TABLE IF NOT EXISTS public.barbers (
     rating DECIMAL(3,1) DEFAULT 0,
     review_count INTEGER DEFAULT 0,
     specialties TEXT[],
-    price_range TEXT, -- $, $$, $$$
+    price_range TEXT,
     phone TEXT,
     instagram_url TEXT,
     image_url TEXT,
@@ -61,19 +58,17 @@ CREATE TABLE IF NOT EXISTS public.barbers (
     created_at TIMESTAMPTZ DEFAULT now()
 );
 
--- 5. Randevular (Yeni)
 CREATE TABLE IF NOT EXISTS public.appointments (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
     barber_id UUID REFERENCES public.barbers(id) ON DELETE CASCADE NOT NULL,
     moment_id UUID REFERENCES public.moments(id),
     appointment_date TIMESTAMPTZ NOT NULL,
-    status TEXT DEFAULT 'pending', -- pending, confirmed, completed, cancelled
+    status TEXT DEFAULT 'pending',
     notes TEXT,
     created_at TIMESTAMPTZ DEFAULT now()
 );
 
--- 6. Favori Stiller (Virtual Try-On)
 CREATE TABLE IF NOT EXISTS public.favorite_styles (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
@@ -83,18 +78,17 @@ CREATE TABLE IF NOT EXISTS public.favorite_styles (
     created_at TIMESTAMPTZ DEFAULT now()
 );
 
--- 7. Bildirimler (Yeni)
 CREATE TABLE IF NOT EXISTS public.notifications (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
     title TEXT NOT NULL,
     message TEXT NOT NULL,
-    type TEXT, -- system, appointment, glow_tip
+    type TEXT,
     is_read BOOLEAN DEFAULT false,
     created_at TIMESTAMPTZ DEFAULT now()
 );
 
--- RLS Ayarları
+-- 2. RLS Etkinleştir
 ALTER TABLE public.users_profile ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_baseline ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.moments ENABLE ROW LEVEL SECURITY;
@@ -103,18 +97,34 @@ ALTER TABLE public.appointments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.favorite_styles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
 
--- Politikalar
-CREATE POLICY "Users can manage own profile" ON public.users_profile FOR ALL USING (auth.uid() = user_id);
-CREATE POLICY "Users can manage own baseline" ON public.user_baseline FOR ALL USING (auth.uid() = user_id);
-CREATE POLICY "Users can manage own moments" ON public.moments FOR ALL USING (auth.uid() = user_id);
-CREATE POLICY "Anyone can view barbers" ON public.barbers FOR SELECT USING (true);
-CREATE POLICY "Users can manage own appointments" ON public.appointments FOR ALL USING (auth.uid() = user_id);
-CREATE POLICY "Users can manage own favorites" ON public.favorite_styles FOR ALL USING (auth.uid() = user_id);
-CREATE POLICY "Users can manage own notifications" ON public.notifications FOR ALL USING (auth.uid() = user_id);
+-- 3. Politikaları Temizle ve Yeniden Oluştur (Hata almamak için DROP IF EXISTS kullanıyoruz)
+DO $$ 
+BEGIN
+    -- Users Profile
+    DROP POLICY IF EXISTS "Users can manage own profile" ON public.users_profile;
+    CREATE POLICY "Users can manage own profile" ON public.users_profile FOR ALL USING (auth.uid() = user_id);
 
--- Örnek Veriler
-INSERT INTO public.barbers (name, city, rating, specialties, price_range, is_verified)
-VALUES 
-('The Heritage Lounge', 'Istanbul', 4.9, ARRAY['Classic Fade', 'Hot Towel Shave'], '$$$', true),
-('Glowé Studio', 'Istanbul', 5.0, ARRAY['AI Style Matching', 'Modern Texture'], '$$$$', true),
-('Urban Edge', 'Ankara', 4.7, ARRAY['Buzz Cut', 'Line Up'], '$$', false);
+    -- User Baseline
+    DROP POLICY IF EXISTS "Users can manage own baseline" ON public.user_baseline;
+    CREATE POLICY "Users can manage own baseline" ON public.user_baseline FOR ALL USING (auth.uid() = user_id);
+
+    -- Moments
+    DROP POLICY IF EXISTS "Users can manage own moments" ON public.moments;
+    CREATE POLICY "Users can manage own moments" ON public.moments FOR ALL USING (auth.uid() = user_id);
+
+    -- Barbers
+    DROP POLICY IF EXISTS "Anyone can view barbers" ON public.barbers;
+    CREATE POLICY "Anyone can view barbers" ON public.barbers FOR SELECT USING (true);
+
+    -- Appointments
+    DROP POLICY IF EXISTS "Users can manage own appointments" ON public.appointments;
+    CREATE POLICY "Users can manage own appointments" ON public.appointments FOR ALL USING (auth.uid() = user_id);
+
+    -- Favorite Styles
+    DROP POLICY IF EXISTS "Users can manage own favorites" ON public.favorite_styles;
+    CREATE POLICY "Users can manage own favorites" ON public.favorite_styles FOR ALL USING (auth.uid() = user_id);
+
+    -- Notifications
+    DROP POLICY IF EXISTS "Users can manage own notifications" ON public.notifications;
+    CREATE POLICY "Users can manage own notifications" ON public.notifications FOR ALL USING (auth.uid() = user_id);
+END $$;
