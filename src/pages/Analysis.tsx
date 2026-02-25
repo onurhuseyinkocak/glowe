@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { Sparkles, Loader2 } from 'lucide-react';
 import { showError } from '@/utils/toast';
+import { generateGlowPlan } from '@/utils/glow-engine';
 
 const Analysis = () => {
   const { id } = useParams();
@@ -19,38 +20,42 @@ const Analysis = () => {
 
   const processAnalysis = async () => {
     try {
+      // Simüle edilmiş analiz süresi (6 saniye)
       await new Promise(resolve => setTimeout(resolve, 6000));
-      const { data: analysis } = await supabase.from('analyses').select('*, users_profile(*)').eq('id', id).single();
       
-      const faceShapes = ['Oval', 'Square', 'Round', 'Heart', 'Diamond'];
-      const faceShape = faceShapes[Math.floor(Math.random() * faceShapes.length)];
-      const score = 88 + Math.floor(Math.random() * 10);
-      const isCovered = analysis.users_profile.hair_coverage === 'covered';
+      const { data: analysis, error: fetchError } = await supabase
+        .from('analyses')
+        .select('*, users_profile(*)')
+        .eq('id', id)
+        .single();
+      
+      if (fetchError) throw fetchError;
 
-      let stylingDirection = '';
-      if (isCovered) {
-        if (analysis.event_type === 'Job Interview') {
-          stylingDirection = 'Structured wrap with a neutral palette. Focus on a polished silhouette and balanced volume.';
-        } else if (analysis.event_type === 'First Date') {
-          stylingDirection = 'Soft face framing with elegant draping. Use warm, radiant fabric tones to enhance your glow.';
-        } else {
-          stylingDirection = 'Refined layering with satin textures. Focus on highlight balance and sophisticated volume.';
-        }
-      }
+      // Glow Engine ile planı oluştur
+      const plan = generateGlowPlan(
+        analysis.users_profile.identity,
+        analysis.event_type,
+        analysis.style_energy,
+        analysis.users_profile.hair_coverage
+      );
 
-      await supabase.from('analyses').update({
+      const { error: updateError } = await supabase.from('analyses').update({
         status: 'done',
-        glow_face_shape: faceShape,
-        glow_score: score,
-        hair_coverage: analysis.users_profile.hair_coverage,
-        best_cut: isCovered ? null : (analysis.event_type === 'Job Interview' ? 'Polished low bun or structured bob.' : 'Soft romantic waves with natural volume.'),
-        styling_direction: isCovered ? stylingDirection : null,
-        makeup_direction: analysis.event_type === 'First Date' ? 'Dewy skin, soft flush, and a hint of shimmer.' : 'Matte finish, neutral tones, and confident brows.',
-        why_it_works: `Your ${faceShape} features are naturally balanced. We're enhancing that symmetry for your ${analysis.event_type}.`
+        glow_face_shape: plan.face_shape,
+        glow_score: plan.glow_score,
+        plan_json: plan,
+        best_cut: plan.styling.content, // Geriye dönük uyumluluk için
+        makeup_direction: plan.makeup_vibe,
+        why_it_works: plan.harmony_insight
       }).eq('id', id);
 
+      if (updateError) throw updateError;
+
       navigate(`/results/${id}`);
-    } catch (error: any) { showError(error.message); navigate('/'); }
+    } catch (error: any) { 
+      showError(error.message || 'Analysis failed. Please try again.'); 
+      navigate('/'); 
+    }
   };
 
   return (

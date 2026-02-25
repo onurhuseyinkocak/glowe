@@ -2,11 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
-import { LogOut, User, Shield, Bell, Trash2, ChevronRight, Sparkles } from 'lucide-react';
+import { LogOut, User, Shield, Bell, Trash2, ChevronRight, Sparkles, Info } from 'lucide-react';
 import { showSuccess, showError } from '@/utils/toast';
 
 const Settings = () => {
   const [profile, setProfile] = useState<any>(null);
+  const [tapCount, setTapCount] = useState(0);
+  const [showDiagnostics, setShowDiagnostics] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -34,7 +36,24 @@ const Settings = () => {
 
   const handleDeleteAccount = async () => {
     if (window.confirm('Are you sure you want to delete your account? This action is permanent.')) {
-      showError('Account deletion is restricted in MVP mode.');
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+        
+        // MVP kısıtlaması: Gerçek silme işlemi yerine kullanıcıyı bilgilendiriyoruz
+        showError('Account deletion is restricted in MVP mode for safety.');
+      } catch (e) {
+        showError('Failed to delete account.');
+      }
+    }
+  };
+
+  const handleVersionTap = () => {
+    const newCount = tapCount + 1;
+    setTapCount(newCount);
+    if (newCount >= 5) {
+      setShowDiagnostics(true);
+      setTapCount(0);
     }
   };
 
@@ -57,6 +76,20 @@ const Settings = () => {
           </div>
         </div>
       </div>
+
+      {showDiagnostics && (
+        <div className="p-6 rounded-[32px] bg-black text-green-400 font-mono text-[10px] space-y-2 animate-fade-up">
+          <div className="flex justify-between items-center mb-2">
+            <span className="font-bold uppercase">Diagnostics Mode</span>
+            <button onClick={() => setShowDiagnostics(false)} className="text-white">Close</button>
+          </div>
+          <p>VERSION: 1.2.0-prod</p>
+          <p>ENV: production</p>
+          <p>SUPABASE: {import.meta.env.VITE_SUPABASE_URL?.substring(0, 15)}...</p>
+          <p>AUTH: google, apple, email</p>
+          <p>LAST_LOG: null</p>
+        </div>
+      )}
 
       <div className="space-y-4">
         <p className="text-[10px] font-bold text-[#8C7E7E] uppercase tracking-[0.3em] px-2">Preferences</p>
@@ -93,7 +126,12 @@ const Settings = () => {
       </div>
 
       <div className="text-center pt-8">
-        <p className="text-[10px] font-bold text-[#F5F0E1] uppercase tracking-[0.4em]">Glowé v1.2.0</p>
+        <button 
+          onClick={handleVersionTap}
+          className="text-[10px] font-bold text-[#F5F0E1] uppercase tracking-[0.4em] hover:text-[#8C7E7E] transition-colors"
+        >
+          Glowé v1.2.0
+        </button>
       </div>
     </div>
   );
