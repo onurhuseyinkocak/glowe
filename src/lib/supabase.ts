@@ -8,14 +8,17 @@ export const supabase = createClient(
   supabaseAnonKey || 'placeholder'
 );
 
-// OAuth yönlendirme URL'i (Geliştirme ve Prodüksiyon için)
+/**
+ * Auth yönlendirmeleri için doğru URL'i döner.
+ * Vercel'de VITE_SITE_URL tanımlı olmalıdır.
+ */
 export const getURL = () => {
   let url =
-    import.meta.env.VITE_SITE_URL ?? // Değişken tanımlıysa kullan
-    window.location.origin ?? // Tarayıcı origin'ini kullan
+    import.meta.env.VITE_SITE_URL ?? // Vercel'de tanımladığın ana URL
+    window.location.origin ?? // Tarayıcıdaki mevcut adres
     'http://localhost:8080';
   
-  // URL'in sonunda / olduğundan emin ol
-  url = url.charAt(url.length - 1) === '/' ? url : `${url}/`;
+  // URL'in sonunda / olduğundan emin ol (Supabase standardı)
+  url = url.endsWith('/') ? url : `${url}/`;
   return url;
 };
